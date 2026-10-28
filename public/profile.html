@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Profile & Kisan Verification — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 820px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; Farmer Profile
+      </p>
+      <h1>Farmer Profile & Verification</h1>
+      <p style="color:var(--color-text-secondary); margin-bottom: var(--space-8);">
+        Manage your contact details, regional language preferences, and submit Kisan KYC verification.
+      </p>
+
+      <!-- Profile Form Card -->
+      <div class="card" style="padding: var(--space-8); margin-bottom: 32px;">
+        <h3 style="font-size:1.25rem; margin-bottom:16px; border-bottom:1px solid var(--color-border-light); padding-bottom:8px;">
+          Personal & Farm Details
+        </h3>
+
+        <form id="profile-form">
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="prof-name">Full Name</label>
+              <input type="text" id="prof-name" required>
+            </div>
+            <div class="form-group">
+              <label for="prof-phone">Mobile Number</label>
+              <input type="tel" id="prof-phone" disabled style="background:#eee;">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prof-bio">Farmer Bio / Farming Experience</label>
+            <textarea id="prof-bio" rows="2" placeholder="Tell other farmers about your acreage, crops, and equipment experience..."></textarea>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="prof-state">State</label>
+              <select id="prof-state" required>
+                <option value="Punjab">Punjab</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="prof-district">District</label>
+              <input type="text" id="prof-district" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="prof-town">Village / Town</label>
+              <input type="text" id="prof-town" required>
+            </div>
+            <div class="form-group">
+              <label for="prof-pincode">PIN Code</label>
+              <input type="text" id="prof-pincode" pattern="\d{6}" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="prof-lang">Preferred Interface Language</label>
+            <select id="prof-lang">
+              <option value="en">English</option>
+              <option value="te">తెలుగు (Telugu)</option>
+              <option value="hi">हिन्दी (Hindi)</option>
+              <option value="ta">தமிழ் (Tamil)</option>
+              <option value="kn">ಕನ್ನಡ (Kannada)</option>
+              <option value="mr">मराठी (Marathi)</option>
+            </select>
+          </div>
+
+          <button type="submit" class="btn btn-primary" style="margin-top:16px;">Save Profile Changes</button>
+        </form>
+      </div>
+
+      <!-- Kisan Verification KYC Card -->
+      <div class="card" style="padding: var(--space-8);">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--color-border-light); padding-bottom:8px; margin-bottom:16px;">
+          <h3 style="font-size:1.25rem; margin-bottom:0;">Kisan Trust & Identity Verification (KYC)</h3>
+          <span id="kyc-status-badge" class="badge badge-pending">Pending Review</span>
+        </div>
+
+        <p style="font-size:0.9rem; color:var(--color-text-secondary); margin-bottom:16px;">
+          Get verified to receive higher search ranking and enable instant booking approvals on your equipment listings.
+        </p>
+
+        <form id="kyc-form">
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="kyc-type">Document Type</label>
+              <select id="kyc-type" required>
+                <option value="kisan_credit_card">Kisan Credit Card (KCC)</option>
+                <option value="aadhaar">Aadhaar Card (Masked)</option>
+                <option value="voter_id">Voter ID / EPIC</option>
+                <option value="driving_license">Driving License (Commercial/Tractor)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="kyc-number">Masked Document Number</label>
+              <input type="text" id="kyc-number" placeholder="e.g. XXXX-XXXX-1234" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="kyc-file">Upload Document Scan / Photo</label>
+            <input type="file" id="kyc-file" accept="image/*,.pdf" style="padding:6px; background:#faf8f5;">
+            <span class="form-hint">Stored strictly in private encrypted storage; visible only to platform verification officers.</span>
+          </div>
+
+          <button type="submit" class="btn btn-secondary">Submit KYC Verification</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { I18n } from '/assets/js/i18n.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    async function loadProfile() {
+      try {
+        const res = await Api.get('/me/profile');
+        const { profile, verificationStatus } = res.data;
+
+        document.getElementById('prof-name').value = profile.full_name || '';
+        document.getElementById('prof-phone').value = profile.phone_number || '';
+        document.getElementById('prof-bio').value = profile.bio || '';
+        if (profile.state) document.getElementById('prof-state').value = profile.state;
+        document.getElementById('prof-district').value = profile.district || '';
+        document.getElementById('prof-town').value = profile.village_or_town || '';
+        document.getElementById('prof-pincode').value = profile.pin_code || '';
+        document.getElementById('prof-lang').value = profile.preferred_language || I18n.getLanguage();
+
+        const kycBadge = document.getElementById('kyc-status-badge');
+        kycBadge.textContent = verificationStatus.toUpperCase();
+        kycBadge.className = `badge badge-${verificationStatus === 'verified' ? 'available' : 'pending'}`;
+      } catch (err) {
+        Toast.error('Could not load profile: ' + err.message);
+      }
+    }
+
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          fullName: document.getElementById('prof-name').value.trim(),
+          bio: document.getElementById('prof-bio').value.trim(),
+          state: document.getElementById('prof-state').value,
+          district: document.getElementById('prof-district').value.trim(),
+          villageOrTown: document.getElementById('prof-town').value.trim(),
+          pinCode: document.getElementById('prof-pincode').value.trim(),
+          preferredLanguage: document.getElementById('prof-lang').value
+        };
+
+        const res = await Api.patch('/me/profile', payload);
+        I18n.setLanguage(payload.preferredLanguage);
+        Toast.success('Profile updated successfully!');
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    document.getElementById('kyc-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await Api.post('/me/verification-requests', {
+          idType: document.getElementById('kyc-type').value,
+          idNumberMasked: document.getElementById('kyc-number').value.trim(),
+          documentFilePath: 'documents/sample-kyc-doc.jpg'
+        });
+        Toast.success('Kisan KYC verification submitted! Our moderation team will review within 24 hours.');
+        loadProfile();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>
+

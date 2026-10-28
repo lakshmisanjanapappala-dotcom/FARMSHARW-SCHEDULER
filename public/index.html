@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FarmSharw Scheduler — Agricultural Equipment Rental & Idle-Time Exchange</title>
+  <meta name="description" content="Connect with nearby farmers and machinery owners to rent or exchange agricultural equipment. Reduce idle time, share tractors, rotavators and harvesters across India.">
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main>
+    <!-- Hero Section -->
+    <section class="hero-section">
+      <div class="container">
+        <div class="hero-content">
+          <span class="badge badge-exchange" style="margin-bottom: 12px; font-size: 0.8rem; background: #fff2d6; color: #8a5712;">
+            🇮🇳 India's Kisan Machinery Sharing & Idle-Time Exchange
+          </span>
+          <h1 class="hero-title">Share Equipment. Save Time. Grow Together.</h1>
+          <p class="hero-subtitle">
+            Connect directly with verified farmers and machinery owners nearby. Rent high-efficiency tractors, harvesters, and rotavators at transparent hourly/daily rates, or swap idle implements through structured equipment exchanges.
+          </p>
+          <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 32px;">
+            <a href="/equipment.html" class="btn btn-secondary btn-lg">🔍 Find Equipment Nearby</a>
+            <a href="/add-equipment.html" class="btn btn-outline btn-lg" style="color: #fff; border-color: rgba(255,255,255,0.7);">🚜 List Your Machinery</a>
+          </div>
+        </div>
+
+        <!-- Hero Search Widget -->
+        <div class="hero-search-box">
+          <form id="hero-search-form" action="/equipment.html" method="GET" class="hero-search-grid">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="hero-search-q">Search Machinery</label>
+              <input type="text" id="hero-search-q" name="q" placeholder="e.g. Mahindra Tractor, 7ft Rotavator, Combine...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="hero-search-category">Category</label>
+              <select id="hero-search-category" name="category">
+                <option value="">All Categories</option>
+                <option value="tractors">Tractors (Utility & 4WD)</option>
+                <option value="rotavators">Rotavators & Rotary Tillers</option>
+                <option value="harvesters">Combine Harvesters</option>
+                <option value="irrigation-pumps">Irrigation Pumps</option>
+                <option value="seed-drills">Seed Drills & Planters</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label for="hero-search-location">PIN / District</label>
+              <input type="text" id="hero-search-location" name="pinCode" placeholder="6-digit PIN code">
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="height: 42px;">Search</button>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Categories Grid -->
+    <section style="padding: var(--space-12) 0;">
+      <div class="container">
+        <div style="text-align: center; max-width: 650px; margin: 0 auto var(--space-8);">
+          <h2>Popular Equipment Categories</h2>
+          <p>Find the right implements for tillage, sowing, spraying, irrigation, and harvesting.</p>
+        </div>
+
+        <div class="grid grid-cols-4" id="categories-container">
+          <!-- Injected via JS -->
+          <a href="/equipment.html?category=tractors" class="category-card">
+            <span class="category-icon">🚜</span>
+            <span class="category-title">Tractors</span>
+            <span class="category-count">Utility & 4WD (35-75 HP)</span>
+          </a>
+          <a href="/equipment.html?category=rotavators" class="category-card">
+            <span class="category-icon">⚙️</span>
+            <span class="category-title">Rotavators</span>
+            <span class="category-count">Seedbed Tillers (5 - 8 Ft)</span>
+          </a>
+          <a href="/equipment.html?category=harvesters" class="category-card">
+            <span class="category-icon">🌾</span>
+            <span class="category-title">Harvesters & Combines</span>
+            <span class="category-count">Paddy, Wheat & Multi-Crop</span>
+          </a>
+          <a href="/equipment.html?category=irrigation-pumps" class="category-card">
+            <span class="category-icon">💧</span>
+            <span class="category-title">Irrigation Pumps</span>
+            <span class="category-count">Diesel & Solar Mobile Trolleys</span>
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- Featured Equipment Section -->
+    <section style="background-color: var(--color-surface); padding: var(--space-12) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: var(--space-8);">
+          <div>
+            <span class="badge badge-available" style="margin-bottom: 8px;">Direct Availability</span>
+            <h2>Featured Agricultural Machinery</h2>
+            <p style="margin-bottom: 0;">Verified equipment available for rental or idle-time swap.</p>
+          </div>
+          <a href="/equipment.html" class="btn btn-outline">View All Listings &rarr;</a>
+        </div>
+
+        <div class="grid grid-cols-3" id="featured-equipment-list">
+          <!-- Loaded dynamically from database/API -->
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <div class="empty-state-icon">🚜</div>
+            <h3>Loading Featured Machinery...</h3>
+            <p>Fetching verified listings from the database.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- How FarmSharw Works -->
+    <section style="padding: var(--space-16) 0;">
+      <div class="container">
+        <div style="text-align: center; max-width: 680px; margin: 0 auto var(--space-12);">
+          <span class="badge badge-exchange" style="margin-bottom: 8px;">Simple, Reliable, Conflict-Safe</span>
+          <h2>How FarmSharw Scheduler Works</h2>
+          <p>Book equipment when you need it, earn income from idle machinery when you don't.</p>
+        </div>
+
+        <div class="grid grid-cols-4">
+          <div class="card" style="padding: var(--space-6); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; margin: 0 auto 16px;">1</div>
+            <h4 style="font-size: 1.1rem;">Discover Nearby</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">Search equipment by category, district, and PIN code. Filter by distance, delivery, and rates.</p>
+          </div>
+
+          <div class="card" style="padding: var(--space-6); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; margin: 0 auto 16px;">2</div>
+            <h4 style="font-size: 1.1rem;">Choose Rent or Swap</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">Book a standard paid rental with line-item price breakdown, or propose an idle-time machine exchange.</p>
+          </div>
+
+          <div class="card" style="padding: var(--space-6); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; margin: 0 auto 16px;">3</div>
+            <h4 style="font-size: 1.1rem;">Guaranteed Schedules</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">PostgreSQL exclusion constraints lock schedules atomically to ensure zero overlapping reservation conflicts.</p>
+          </div>
+
+          <div class="card" style="padding: var(--space-6); text-align: center;">
+            <div style="width: 48px; height: 48px; border-radius: 50%; background: var(--color-primary-subtle); color: var(--color-primary); display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 1.25rem; margin: 0 auto 16px;">4</div>
+            <h4 style="font-size: 1.1rem;">Handover & Work</h4>
+            <p style="font-size: 0.9rem; margin-bottom: 0;">Pay via cash on pickup or online. Complete handover check-in, operate safely, and inspect upon return.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Rental vs Exchange Comparison Table -->
+    <section style="background-color: #f2eee3; padding: var(--space-12) 0; border-top: 1px solid var(--color-border); border-bottom: 1px solid var(--color-border);">
+      <div class="container">
+        <div style="text-align: center; max-width: 700px; margin: 0 auto var(--space-8);">
+          <h2>Paid Rental vs. Idle-Time Exchange</h2>
+          <p>Two distinct operational transaction models tailored to rural cooperative economics.</p>
+        </div>
+
+        <div class="table-responsive" style="background: #fff; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden;">
+          <table class="table">
+            <thead>
+              <tr>
+                <th>Feature / Dimension</th>
+                <th>A. Paid Rental</th>
+                <th>B. Idle-Time Equipment Exchange</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Primary Purpose</strong></td>
+                <td>Hire equipment for a specific time window at standard published rates.</td>
+                <td>Swap access to underutilized machinery without requiring full monetary purchase.</td>
+              </tr>
+              <tr>
+                <td><strong>Monetary Requirement</strong></td>
+                <td>Hourly, daily, weekly, or seasonal fee + GST + security deposit.</td>
+                <td>Zero upfront rent required. Optional agreed cash adjustment for value differences.</td>
+              </tr>
+              <tr>
+                <td><strong>Parties Involved</strong></td>
+                <td>Renter and Equipment Owner.</td>
+                <td>Two farmers holding complementary equipment (e.g. Tractor owner ↔ Harvester owner).</td>
+              </tr>
+              <tr>
+                <td><strong>Agreement Workflow</strong></td>
+                <td>Instant confirmation or owner approval depending on listing policy.</td>
+                <td>Proposal & counteroffer negotiation, mutual acceptance, and atomic 2-way schedule locks.</td>
+              </tr>
+              <tr>
+                <td><strong>Payment Methods</strong></td>
+                <td>Cash on pickup or verified online checkout.</td>
+                <td>Equipment access swap, plus optional cash settlement recorded in contract.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- FAQ Accordion Preview -->
+    <section style="padding: var(--space-16) 0;">
+      <div class="container" style="max-width: 800px;">
+        <div style="text-align: center; margin-bottom: var(--space-8);">
+          <h2>Frequently Asked Questions</h2>
+          <p>Common questions from farmers and machinery owners.</p>
+        </div>
+
+        <div class="accordion" id="faq-accordion">
+          <div class="accordion-item active">
+            <button class="accordion-header">
+              <span>How does conflict prevention protect my equipment booking?</span>
+              <span>▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>FarmSharw enforces PostgreSQL transaction exclusion constraints (`btree_gist` range types). When an active reservation is placed, the database blocks overlapping reservations at the engine level. No two bookings or exchanges can reserve the same machine at overlapping times.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header">
+              <span>Can I pay in cash when picking up the equipment?</span>
+              <span>▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>Yes. If the equipment listing permits cash-on-pickup, you can select Cash at booking. Payments remain in 'pending' status until the owner inspects the machine and records cash collection in their dashboard, creating an immutable audit trail.</p>
+            </div>
+          </div>
+
+          <div class="accordion-item">
+            <button class="accordion-header">
+              <span>How are equipment locations handled for privacy?</span>
+              <span>▼</span>
+            </button>
+            <div class="accordion-body">
+              <p>We respect farmer privacy. Public marketplace listings show only approximate locations (village/district/PIN code). The exact pickup address and landmark directions are strictly shared only after a booking is confirmed by the owner.</p>
+            </div>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: var(--space-8);">
+          <a href="/faq.html" class="btn btn-outline">Read All Frequently Asked Questions &rarr;</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Api } from '/assets/js/api.js';
+
+    renderHeader();
+    renderFooter();
+
+    // Accordion toggle
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        const item = header.parentElement;
+        item.classList.toggle('active');
+      });
+    });
+
+    // Load Featured Equipment from API
+    async function loadFeatured() {
+      const container = document.getElementById('featured-equipment-list');
+      try {
+        const res = await Api.get('/equipment', { limit: 3 });
+        const items = res?.data?.items || [];
+
+        if (items.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <div class="empty-state-icon">🚜</div>
+              <h3>No Listings Yet</h3>
+              <p>Be the first in your district to list agricultural equipment!</p>
+              <a href="/add-equipment.html" class="btn btn-primary">+ List Machinery</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = items.map(item => `
+          <div class="card equipment-card card-hover">
+            <div class="equipment-card-media">
+              <img src="${item.images[0]?.image_url || '/assets/images/tractor.svg'}" alt="${item.title}" loading="lazy">
+              <span class="badge badge-available equipment-card-badge-top">${item.equipment_type || 'Machinery'}</span>
+              ${item.is_exchange_eligible ? '<span class="badge badge-exchange equipment-card-exchange-tag">🔄 Exchange Eligible</span>' : ''}
+            </div>
+            <div class="card-body">
+              <div class="equipment-card-meta">
+                <span>📍 ${item.village_or_town}, ${item.district} (${item.state})</span>
+              </div>
+              <h3 class="equipment-card-title">
+                <a href="/equipment-details.html?id=${item.id}">${item.title}</a>
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${item.description}
+              </p>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: auto;">
+                <div class="equipment-card-price">
+                  ₹${item.pricing?.daily_rate || '---'}<small>/day</small>
+                  ${item.pricing?.hourly_rate ? `<span style="font-size:0.8rem; color:#666; font-weight:normal; margin-left:6px;">(₹${item.pricing.hourly_rate}/hr)</span>` : ''}
+                </div>
+                <span style="font-size: 0.8rem; color: #2e7d32; font-weight: 600;">Condition: ${item.condition}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span style="font-size:0.8rem; color:var(--color-text-muted);">By ${item.owner_name}</span>
+              <a href="/equipment-details.html?id=${item.id}" class="btn btn-primary btn-sm">View Details</a>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `
+          <div class="empty-state" style="grid-column: 1 / -1;">
+            <p style="color:var(--color-status-cancelled);">Could not load equipment: ${err.message}</p>
+          </div>
+        `;
+      }
+    }
+
+    loadFeatured();
+  </script>
+</body>
+</html>
+

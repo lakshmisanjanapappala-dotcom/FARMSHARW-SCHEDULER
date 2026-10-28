@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About Us & Kisan Sahayata — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16);">
+    <div class="container" style="max-width: 860px;">
+      <div style="text-align: center; margin-bottom: var(--space-12);">
+        <span class="badge badge-available" style="margin-bottom: 8px;">Built for Indian Agriculture</span>
+        <h1>About FarmSharw Scheduler</h1>
+        <p style="font-size: var(--font-size-lg);">
+          Transforming idle agricultural machinery into accessible, productive community assets.
+        </p>
+      </div>
+
+      <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+        <h2>Our Mission</h2>
+        <p>
+          In India, small and marginal farmers account for over 85% of agricultural operational holdings. High-power machinery like 45+ HP tractors, combine harvesters, laser land levellers, and seed drills represent massive capital investments that individual smallholders cannot afford to purchase. Meanwhile, machinery owners often face 8 to 10 months of machine idle time each year.
+        </p>
+        <p>
+          FarmSharw Scheduler bridges this gap with a modern, trusted equipment rental and idle-time exchange platform. We provide rural communities with reliable discovery, database-enforced conflict-free reservation scheduling, transparent pricing, and regional language support.
+        </p>
+      </div>
+
+      <div class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+        <h2>The Core Principles</h2>
+        <div class="grid grid-cols-2" style="margin-top:16px;">
+          <div>
+            <h4 style="color:var(--color-primary);">1. Farmer Trust & KYC</h4>
+            <p style="font-size:0.9rem;">Identity verification via Kisan Credit Cards (KCC), Aadhaar, or driving licenses ensures trustworthy handovers.</p>
+          </div>
+          <div>
+            <h4 style="color:var(--color-primary);">2. Geodata Privacy</h4>
+            <p style="font-size:0.9rem;">Exact farm locations are never broadcast publicly. Handover addresses are only unlocked upon mutually confirmed bookings.</p>
+          </div>
+          <div>
+            <h4 style="color:var(--color-primary);">3. Zero Schedule Double-Booking</h4>
+            <p style="font-size:0.9rem;">PostgreSQL range exclusion constraints prevent conflicting bookings at the database engine level.</p>
+          </div>
+          <div>
+            <h4 style="color:var(--color-primary);">4. Fair Economics</h4>
+            <p style="font-size:0.9rem;">Low 5% platform technology fee, with full support for cash on pickup and digital payments.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact Inquiry -->
+      <div class="card" style="padding: var(--space-6);">
+        <h3>Contact & Kisan Sahayata Support</h3>
+        <p>Have questions about listing your machinery or proposing an equipment exchange? Reach our team:</p>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:16px;">
+          <div style="background:#faf8f5; padding:16px; border-radius:var(--radius-md);">
+            <strong>📞 Toll-Free Helpline:</strong><br>
+            +91-1800-419-7890 (All Indian States, 7:00 AM – 9:00 PM IST)
+          </div>
+          <div style="background:#faf8f5; padding:16px; border-radius:var(--radius-md);">
+            <strong>✉️ Email Support:</strong><br>
+            sahayata@farmsharw.in
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    renderHeader();
+    renderFooter();
+  </script>
+</body>
+</html>
+

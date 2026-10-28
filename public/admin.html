@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Platform Administration & Moderation — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: 24px;">
+        <div>
+          <span class="badge" style="background:#fdf5e6; color:#8a5712; margin-bottom:6px;">Administrator Console</span>
+          <h1 style="margin-bottom: 0;">Platform Operations & Moderation</h1>
+        </div>
+        <div style="font-size:0.85rem; color:#666;">
+          Role-protected: Admin Access Only
+        </div>
+      </div>
+
+      <!-- Real Server-Derived Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">Registered Users</span>
+          <span class="metric-value" id="adm-users-count">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Published Machinery</span>
+          <span class="metric-value" id="adm-listings-count">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Confirmed Bookings</span>
+          <span class="metric-value" id="adm-bookings-count" style="color:var(--color-status-confirmed);">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Platform Fees Earned</span>
+          <span class="metric-value" id="adm-fees-earned" style="color:var(--color-primary);">₹0.00</span>
+        </div>
+      </div>
+
+      <!-- Admin Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-adm-listings">🚜 Machinery Moderation Queue</button>
+        <button class="tab-btn" data-tab="tab-adm-users">👥 Registered Farmers</button>
+        <button class="tab-btn" data-tab="tab-adm-disputes">⚖️ Disputes & Refunds</button>
+        <button class="tab-btn" data-tab="tab-adm-audit">📜 Immutable Audit Logs</button>
+      </div>
+
+      <!-- Tab 1: Listings Moderation -->
+      <div id="tab-adm-listings" class="tab-pane active">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">Equipment Listings Review</h3>
+          </div>
+          <div class="card-body" id="adm-listings-table-container">
+            <div class="empty-state"><p>Loading listings queue...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Users -->
+      <div id="tab-adm-users" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">Farmer Profiles & KYC Status</h3>
+          </div>
+          <div class="card-body" id="adm-users-table-container">
+            <div class="empty-state"><p>Loading user directory...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Disputes -->
+      <div id="tab-adm-disputes" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">Active Dispute Cases</h3>
+          </div>
+          <div class="card-body" id="adm-disputes-table-container">
+            <div class="empty-state"><p>Loading disputes...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Audit Logs -->
+      <div id="tab-adm-audit" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">Security & Operational Audit Trail</h3>
+          </div>
+          <div class="card-body" id="adm-audit-table-container">
+            <div class="empty-state"><p>Loading audit logs...</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    // Guard page: Requires Admin
+    if (!Auth.requireAuth(['admin'])) {
+      // redirected
+    }
+
+    // Tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+
+    async function loadAdminData() {
+      try {
+        // Overview metrics
+        const ovRes = await Api.get('/admin/overview');
+        const m = ovRes.data.metrics;
+        document.getElementById('adm-users-count').textContent = m.totalUsers;
+        document.getElementById('adm-listings-count').textContent = `${m.publishedEquipment} / ${m.totalEquipment}`;
+        document.getElementById('adm-bookings-count').textContent = m.confirmedBookings;
+        document.getElementById('adm-fees-earned').textContent = `₹${m.platformFeesEarned.toFixed(2)}`;
+
+        // Listings
+        const listingsRes = await Api.get('/admin/listings');
+        const listings = listingsRes.data.listings || [];
+        document.getElementById('adm-listings-table-container').innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Owner</th>
+                  <th>Category</th>
+                  <th>Location</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${listings.map(e => `
+                  <tr>
+                    <td><strong>${e.title}</strong></td>
+                    <td>${e.owner_name}</td>
+                    <td>${e.category_name}</td>
+                    <td>${e.district}, ${e.state}</td>
+                    <td>
+                      <span class="badge ${e.is_published ? 'badge-available' : 'badge-cancelled'}">
+                        ${e.is_published ? 'Published' : 'Hidden'}
+                      </span>
+                      ${e.is_verified ? '<span class="badge badge-verified">Verified</span>' : ''}
+                    </td>
+                    <td>
+                      <button class="btn btn-outline btn-sm toggle-publish-btn" data-id="${e.id}" data-current="${e.is_published}">
+                        ${e.is_published ? 'Unpublish' : 'Approve'}
+                      </button>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        document.querySelectorAll('.toggle-publish-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const id = btn.getAttribute('data-id');
+            const current = btn.getAttribute('data-current') === 'true';
+            try {
+              await Api.post(`/admin/listings/${id}/moderate`, { isPublished: !current });
+              Toast.success('Listing moderation updated!');
+              loadAdminData();
+            } catch (err) {
+              Toast.error(err.message);
+            }
+          });
+        });
+
+        // Users
+        const usersRes = await Api.get('/admin/users');
+        const users = usersRes.data.users || [];
+        document.getElementById('adm-users-table-container').innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone / Email</th>
+                  <th>Roles</th>
+                  <th>Location</th>
+                  <th>KYC Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${users.map(u => `
+                  <tr>
+                    <td><strong>${u.full_name}</strong></td>
+                    <td>${u.phone_number || u.email}</td>
+                    <td>${u.roles.join(', ')}</td>
+                    <td>${u.district || '---'}, ${u.state || '---'}</td>
+                    <td><span class="badge ${u.verificationStatus === 'verified' ? 'badge-available' : 'badge-pending'}">${u.verificationStatus}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        // Disputes
+        const disputesRes = await Api.get('/admin/disputes');
+        const disputes = disputesRes.data.disputes || [];
+        const dispContainer = document.getElementById('adm-disputes-table-container');
+        if (disputes.length === 0) {
+          dispContainer.innerHTML = '<div class="empty-state"><p>Zero open disputes! Cooperative operations are smooth.</p></div>';
+        } else {
+          dispContainer.innerHTML = `
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ref</th>
+                    <th>Opened By</th>
+                    <th>Against</th>
+                    <th>Reason</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${disputes.map(d => `
+                    <tr>
+                      <td><strong>${d.dispute_reference}</strong></td>
+                      <td>${d.opened_by_name}</td>
+                      <td>${d.against_user_name}</td>
+                      <td>${d.reason}</td>
+                      <td><span class="badge badge-${d.status}">${d.status}</span></td>
+                      <td>
+                        <button class="btn btn-primary btn-sm resolve-disp-btn" data-id="${d.id}">Resolve</button>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+          document.querySelectorAll('.resolve-disp-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const dId = btn.getAttribute('data-id');
+              const summary = prompt('Resolution summary / determination:');
+              if (summary !== null) {
+                await Api.post(`/admin/disputes/${dId}/resolve`, {
+                  status: 'resolved',
+                  resolutionSummary: summary
+                });
+                Toast.success('Dispute resolved');
+                loadAdminData();
+              }
+            });
+          });
+        }
+
+        // Audit Logs
+        const auditRes = await Api.get('/admin/audit-logs');
+        const logs = auditRes.data.logs || [];
+        document.getElementById('adm-audit-table-container').innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Timestamp</th>
+                  <th>Action</th>
+                  <th>Entity</th>
+                  <th>Entity ID</th>
+                  <th>IP Address</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${logs.map(l => `
+                  <tr>
+                    <td><small>${new Date(l.created_at).toLocaleString('en-IN')}</small></td>
+                    <td><strong>${l.action}</strong></td>
+                    <td>${l.entity_type}</td>
+                    <td><small style="font-family:monospace;">${l.entity_id || '---'}</small></td>
+                    <td><small>${l.ip_address}</small></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    }
+
+    loadAdminData();
+  </script>
+</body>
+</html>
+

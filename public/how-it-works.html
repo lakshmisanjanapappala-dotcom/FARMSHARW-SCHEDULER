@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>How FarmSharw Works — Agricultural Equipment Rental & Idle-Time Exchange</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16);">
+    <div class="container" style="max-width: 900px;">
+      <div style="text-align: center; margin-bottom: var(--space-12);">
+        <span class="badge badge-exchange" style="margin-bottom: 8px;">Kisan Equipment Sharing Guide</span>
+        <h1>How FarmSharw Scheduler Works</h1>
+        <p style="font-size: var(--font-size-lg);">
+          From tractor discovery to return handover, here is everything you need to know about sharing farm machinery safely.
+        </p>
+      </div>
+
+      <!-- Section 1: For Renters -->
+      <div class="card" style="margin-bottom: var(--space-8); padding: var(--space-6);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <span style="font-size:2rem;">🚜</span>
+          <h2 style="margin-bottom:0; font-size:1.5rem;">For Farmers Needing Machinery (Renters)</h2>
+        </div>
+        <p>Avoid taking heavy capital loans to purchase seasonal implements. Access high-efficiency machinery on flexible hourly, daily, or seasonal terms.</p>
+        
+        <div class="grid grid-cols-3" style="margin-top:16px;">
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">1. Search & Filter</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Search by PIN code, district, or implement type. Review condition ratings and verify delivery options.</p>
+          </div>
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">2. Instant Real-Time Quote</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Pick exact dates. See a transparent breakdown of rent, refundable deposit, 5% platform fee, and GST.</p>
+          </div>
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">3. Check-In & Handover</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Pick up from the owner or receive field delivery. Inspect machine condition together and confirm handover.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: For Equipment Owners -->
+      <div class="card" style="margin-bottom: var(--space-8); padding: var(--space-6);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <span style="font-size:2rem;">🌾</span>
+          <h2 style="margin-bottom:0; font-size:1.5rem;">For Machinery Owners & Custom Hiring Centers</h2>
+        </div>
+        <p>Farm machinery typically sits idle for 60%–75% of the year. Monetize idle machine downtime while retaining full control over your schedule.</p>
+
+        <div class="grid grid-cols-3" style="margin-top:16px;">
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">1. List in 3 Minutes</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Upload photos, set your daily/hourly pricing, configure blackout days, and define delivery radius.</p>
+          </div>
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">2. Approve Bookings</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Choose between automatic instant confirmation or manual request review based on your availability.</p>
+          </div>
+          <div style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:16px;">
+            <h4 style="font-size:1rem; color:var(--color-primary);">3. Direct Payment Record</h4>
+            <p style="font-size:0.85rem; margin-bottom:0;">Accept cash on pickup or online settlement. Record physical collections directly in your dashboard.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 3: Idle-Time Exchange -->
+      <div class="card" style="padding: var(--space-6); border: 2px solid var(--color-secondary);">
+        <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+          <span style="font-size:2rem;">🔄</span>
+          <h2 style="margin-bottom:0; font-size:1.5rem;">The Idle-Time Equipment Exchange Innovation</h2>
+        </div>
+        <p>Have a heavy tractor but need a paddy combine harvester for 4 days? The Idle-Time Exchange allows two farmers to mutually trade machinery usage without full monetary outlay.</p>
+        <ul style="padding-left:24px; line-height:1.7; font-size:0.95rem; color:var(--color-text-secondary);">
+          <li>Propose swapping your machine for another farmer's implement during complementary crop cycles.</li>
+          <li>Agree on start and end dates for both sides.</li>
+          <li>Include an optional mutually agreed cash adjustment if machine market values differ.</li>
+          <li>FarmSharw's engine atomically verifies schedule availability and simultaneously reserves both machines so neither party is stranded.</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    renderHeader();
+    renderFooter();
+  </script>
+</body>
+</html>
+

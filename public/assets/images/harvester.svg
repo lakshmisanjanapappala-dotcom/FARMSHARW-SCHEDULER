@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 250" width="100%" height="100%">
+  <rect width="100%" height="100%" fill="#edf3f0"/>
+  <rect x="0" y="200" width="400" height="50" fill="#6b5742"/>
+  <!-- Harvester Chassis -->
+  <rect x="120" y="80" width="180" height="90" rx="8" fill="#1b4d3e"/>
+  <!-- Cabin Glass -->
+  <path d="M70 70 L130 70 L130 140 L70 140 Z" fill="#d1e3dd" stroke="#12352b" stroke-width="4"/>
+  <!-- Cutter Header Bar -->
+  <rect x="40" y="150" width="80" height="30" fill="#c28833"/>
+  <circle cx="80" cy="165" r="14" fill="#333"/>
+  <!-- Unloading Auger Tube -->
+  <path d="M220 70 L340 30" stroke="#c28833" stroke-width="12" stroke-linecap="round"/>
+  <!-- Track crawler or big wheel -->
+  <rect x="110" y="165" width="200" height="40" rx="16" fill="#2b2d2f"/>
+  <circle cx="140" cy="185" r="14" fill="#888"/>
+  <circle cx="180" cy="185" r="14" fill="#888"/>
+  <circle cx="220" cy="185" r="14" fill="#888"/>
+  <circle cx="260" cy="185" r="14" fill="#888"/>
+  <circle cx="290" cy="185" r="14" fill="#888"/>
+  <text x="200" y="235" font-family="sans-serif" font-size="14" font-weight="bold" fill="#ffffff" text-anchor="middle">Self-Propelled Combine Harvester</text>
+</svg>

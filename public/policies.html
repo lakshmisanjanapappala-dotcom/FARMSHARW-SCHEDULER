@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Policies, Terms & Dispute Procedures — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16);">
+    <div class="container" style="max-width: 860px;">
+      <div style="margin-bottom: var(--space-8);">
+        <h1>Platform Policies & Guidelines</h1>
+        <p style="font-size: var(--font-size-base); color: var(--color-text-secondary);">
+          Legal terms, privacy safeguards, cancellation refund schedules, and dispute management.
+        </p>
+      </div>
+
+      <!-- Terms of Service -->
+      <section id="terms" class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+        <h2>1. Terms of Service</h2>
+        <p>FarmSharw Scheduler operates as a specialized peer-to-peer and business-to-farmer agricultural machinery scheduling platform. By accessing or using the platform, participants agree to comply with all applicable Indian agricultural equipment regulations, motor vehicle road transport laws, and safety guidelines.</p>
+        <p>Equipment owners certify that machinery offered is in roadworthy and mechanically sound operational condition. Renters certify that equipment will be operated strictly by qualified persons with appropriate agricultural vehicle permits.</p>
+      </section>
+
+      <!-- Privacy & Geodata -->
+      <section id="privacy" class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+        <h2>2. Privacy & Geodata Protection</h2>
+        <p>We treat farmer personal data and farm locations with strict confidentiality:</p>
+        <ul style="padding-left:24px; line-height:1.7; font-size:0.95rem; color:var(--color-text-secondary); margin-bottom:16px;">
+          <li>Exact field coordinates and residential landmarks are obscured on public browse and search views.</li>
+          <li>Exact pickup directions are only revealed to verified renters who hold an active, confirmed reservation.</li>
+          <li>Government identity documents uploaded for KYC verification are stored in private Supabase storage buckets and accessible solely by authorized compliance moderators and the document owner.</li>
+        </ul>
+      </section>
+
+      <!-- Cancellation & Refunds -->
+      <section id="cancellation" class="card" style="padding: var(--space-6); margin-bottom: var(--space-8);">
+        <h2>3. Cancellation & Refund Rules</h2>
+        <p>All refund calculations are determined authoritatively server-side based on the notice interval before scheduled start time:</p>
+        <ul style="padding-left:24px; line-height:1.7; font-size:0.95rem; color:var(--color-text-secondary); margin-bottom:16px;">
+          <li><strong>Greater than 48 Hours:</strong> 100% refund of base rental fee and 100% of refundable deposit.</li>
+          <li><strong>24 to 48 Hours:</strong> 70% refund of base rental fee and 100% of refundable deposit.</li>
+          <li><strong>Less than 24 Hours:</strong> 30% refund of base rental fee and 100% of refundable deposit.</li>
+          <li><strong>Cancellation by Equipment Owner:</strong> 100% immediate full refund of all charges to the renter.</li>
+        </ul>
+      </section>
+
+      <!-- Dispute Resolution -->
+      <section id="dispute" class="card" style="padding: var(--space-6);">
+        <h2>4. Dispute Resolution Procedure</h2>
+        <p>If disagreements arise regarding machine cleanliness, handover delays, mechanical breakdown, or unreturned deposits, either participant may file an in-platform Dispute via their booking details screen:</p>
+        <ol style="padding-left:24px; line-height:1.7; font-size:0.95rem; color:var(--color-text-secondary);">
+          <li>The dispute record captures photo evidence, handover notes, and desired resolutions.</li>
+          <li>FarmSharw administrative moderators review the audit trail, messaging history, and inspection logs.</li>
+          <li>Security deposits remain safeguarded in escrow/record until a formal administrative resolution is determined.</li>
+        </ol>
+      </section>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    renderHeader();
+    renderFooter();
+  </script>
+</body>
+</html>
+

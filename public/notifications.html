@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notifications — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 760px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+        <div>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+            <a href="/dashboard.html">Dashboard</a> &rsaquo; Notifications
+          </p>
+          <h1 style="margin-bottom: 0;">Notification Center</h1>
+        </div>
+        <button id="mark-all-read-btn" class="btn btn-outline btn-sm">Mark All As Read</button>
+      </div>
+
+      <div class="card">
+        <div class="card-body" id="notifications-stream">
+          <div class="empty-state"><p>Loading notifications...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    async function loadNotifications() {
+      const container = document.getElementById('notifications-stream');
+      try {
+        const res = await Api.get('/notifications');
+        const list = res.data.notifications || [];
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🔔</div>
+              <h3>No Notifications Yet</h3>
+              <p>You are all caught up! New booking requests, approvals, and exchange updates will appear here.</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = list.map(n => `
+          <div style="padding: 16px; border-bottom: 1px solid var(--color-border-light); display:flex; justify-content:space-between; align-items:flex-start; background:${n.is_read ? 'transparent' : 'var(--color-primary-subtle)'};">
+            <div>
+              <h4 style="font-size:0.95rem; margin-bottom:4px; font-weight:600;">${n.title}</h4>
+              <p style="font-size:0.85rem; color:#444; margin-bottom:6px;">${n.message}</p>
+              <div style="font-size:0.75rem; color:#888;">${new Date(n.created_at).toLocaleString('en-IN')}</div>
+            </div>
+            ${n.link_url ? `<a href="${n.link_url}" class="btn btn-outline btn-sm">View</a>` : ''}
+          </div>
+        `).join('');
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><p style="color:red;">${err.message}</p></div>`;
+      }
+    }
+
+    document.getElementById('mark-all-read-btn').addEventListener('click', async () => {
+      try {
+        await Api.post('/notifications/read-all');
+        Toast.success('All marked as read');
+        loadNotifications();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadNotifications();
+  </script>
+</body>
+</html>
+

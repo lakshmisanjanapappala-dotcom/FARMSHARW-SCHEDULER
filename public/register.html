@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register Farmer Account — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16); display: flex; align-items: center; justify-content: center;">
+    <div class="container" style="max-width: 560px;">
+      <div class="card" style="padding: var(--space-8); box-shadow: var(--shadow-lg);">
+        <div style="text-align: center; margin-bottom: var(--space-6);">
+          <span style="font-size: 2.5rem;">🌾</span>
+          <h2 style="font-size: 1.5rem; margin-top: 8px; margin-bottom: 4px;">Join FarmSharw Scheduler</h2>
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: 0;">
+            One account to discover machinery nearby, rent implements, or list your own machinery for rental and idle-time exchange.
+          </p>
+        </div>
+
+        <form id="register-form">
+          <div class="form-group">
+            <label for="reg-name">Full Name</label>
+            <input type="text" id="reg-name" placeholder="e.g. Balwinder Singh" required>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="reg-phone">Indian Mobile Number</label>
+              <input type="tel" id="reg-phone" placeholder="9812345678" pattern="[6-9][0-9]{9}" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-email">Email Address</label>
+              <input type="email" id="reg-email" placeholder="farmer@example.com" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="reg-state">State</label>
+              <select id="reg-state" required>
+                <option value="">Select State</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Rajasthan">Rajasthan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="reg-district">District</label>
+              <input type="text" id="reg-district" placeholder="e.g. Bathinda, Nalgonda" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="reg-town">Village / Town</label>
+              <input type="text" id="reg-town" placeholder="e.g. Raman Mandi" required>
+            </div>
+            <div class="form-group">
+              <label for="reg-pincode">6-Digit PIN Code</label>
+              <input type="text" id="reg-pincode" pattern="\d{6}" placeholder="e.g. 151301" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="reg-password">Password</label>
+            <input type="password" id="reg-password" placeholder="Minimum 8 characters" minlength="8" required>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex; align-items:flex-start; gap:8px; font-weight:normal; font-size:0.85rem; cursor:pointer;">
+              <input type="checkbox" required style="margin-top:4px;">
+              <span>I agree to the <a href="/policies.html#terms" target="_blank">Terms of Service</a> and <a href="/policies.html#privacy" target="_blank">Privacy Policy</a>.</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 16px;">
+            Create Farmer Account
+          </button>
+        </form>
+
+        <p style="text-align: center; font-size: var(--font-size-sm); margin-top: var(--space-6); margin-bottom: 0;">
+          Already have an account? <a href="/login.html" style="font-weight: 600;">Sign in here</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    document.getElementById('register-form').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const fullName = document.getElementById('reg-name').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const state = document.getElementById('reg-state').value;
+      const district = document.getElementById('reg-district').value.trim();
+      const town = document.getElementById('reg-town').value.trim();
+      const pinCode = document.getElementById('reg-pincode').value.trim();
+
+      const newUser = {
+        id: 'u-' + Date.now(),
+        email,
+        phone: `+91${phone}`,
+        profile: {
+          full_name: fullName,
+          phone_number: `+91${phone}`,
+          state,
+          district,
+          village_or_town: town,
+          pin_code: pinCode
+        },
+        roles: ['renter']
+      };
+
+      Auth.setSession(`mock-token-${newUser.id}`, newUser);
+      Toast.success('Account created successfully! Welcome to FarmSharw.');
+      setTimeout(() => {
+        window.location.href = '/dashboard.html';
+      }, 1000);
+    });
+  </script>
+</body>
+</html>
+

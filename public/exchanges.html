@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Idle-Time Equipment Exchange Hub — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: 24px;">
+        <div>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+            <a href="/dashboard.html">Dashboard</a> &rsaquo; Idle-Time Exchange
+          </p>
+          <h1 style="margin-bottom: 0;">Idle-Time Equipment Exchange Hub</h1>
+          <p style="margin-bottom: 0; color:var(--color-text-secondary);">
+            Trade access to underutilized machinery during off-peak windows without full monetary purchase.
+          </p>
+        </div>
+        <button id="btn-new-exchange" class="btn btn-secondary">+ Propose New Equipment Swap</button>
+      </div>
+
+      <!-- Active Proposals Section -->
+      <div class="card" style="margin-bottom: 32px;">
+        <div class="card-header">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0;">My Exchange Agreements & Proposals</h3>
+        </div>
+        <div class="card-body" id="exchanges-list-container">
+          <div class="empty-state"><p>Loading exchange agreements...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Propose New Exchange -->
+  <div class="modal-backdrop" id="modal-propose-exchange">
+    <div class="modal-dialog" style="max-width: 640px;">
+      <div class="modal-header">
+        <h3>Propose Idle-Time Equipment Swap</h3>
+        <button class="modal-close-btn" data-dismiss="modal">&times;</button>
+      </div>
+      <form id="propose-exchange-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="xch-my-equip">Equipment You Are Offering (From Your Listings) *</label>
+            <select id="xch-my-equip" required>
+              <!-- Injected via JS -->
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="xch-my-start">Your Machine Available From</label>
+              <input type="datetime-local" id="xch-my-start" required>
+            </div>
+            <div class="form-group">
+              <label for="xch-my-end">Your Machine Available Until</label>
+              <input type="datetime-local" id="xch-my-end" required>
+            </div>
+          </div>
+
+          <hr style="border:0; border-top:1px dashed var(--color-border); margin:16px 0;">
+
+          <div class="form-group">
+            <label for="xch-target-equip">Equipment You Are Requesting (Target Machine) *</label>
+            <select id="xch-target-equip" required>
+              <!-- Injected via JS -->
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="xch-target-start">Target Machine Needed From</label>
+              <input type="datetime-local" id="xch-target-start" required>
+            </div>
+            <div class="form-group">
+              <label for="xch-target-end">Target Machine Needed Until</label>
+              <input type="datetime-local" id="xch-target-end" required>
+            </div>
+          </div>
+
+          <!-- Compatibility Score Match Preview -->
+          <div id="match-score-preview" style="background:#fdf9f0; border:1px solid #f3e5c9; border-radius:var(--radius-md); padding:12px; margin-bottom:16px;">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="font-weight:bold; font-size:0.85rem; color:#8f5b12;">Estimated Exchange Compatibility</span>
+              <span id="match-score-badge" class="badge badge-exchange">Calculating...</span>
+            </div>
+            <ul id="match-reasons-list" style="font-size:0.8rem; padding-left:16px; margin:8px 0 0; color:#666;"></ul>
+          </div>
+
+          <div class="form-group">
+            <label for="xch-cash-adj">Optional Agreed Cash Adjustment (₹)</label>
+            <input type="number" id="xch-cash-adj" min="0" value="0" placeholder="0">
+            <span class="form-hint">Use if one implement has higher seasonal wear or HP value.</span>
+          </div>
+
+          <div class="form-group">
+            <label for="xch-notes">Proposal Terms & Notes</label>
+            <textarea id="xch-notes" rows="2" placeholder="Describe seasonal crop cycle, fuel arrangement, and handover points..."></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Dispatch Proposal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+    import { Modal } from '/assets/js/components/modal.js';
+
+    renderHeader();
+    renderFooter();
+    Modal.setupDismissListeners();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const user = Auth.getUser();
+
+    // Set default dates
+    const now = new Date();
+    const d1 = new Date(now.getTime() + 48 * 60 * 60 * 1000);
+    const d2 = new Date(d1.getTime() + 72 * 60 * 60 * 1000);
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatDt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T08:00`;
+
+    document.getElementById('xch-my-start').value = formatDt(d1);
+    document.getElementById('xch-my-end').value = formatDt(d2);
+    document.getElementById('xch-target-start').value = formatDt(d1);
+    document.getElementById('xch-target-end').value = formatDt(d2);
+
+    async function loadExchanges() {
+      const container = document.getElementById('exchanges-list-container');
+      try {
+        const res = await Api.get('/exchanges');
+        const list = res.data.exchanges || [];
+
+        if (list.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🔄</div>
+              <h3>No Idle-Time Exchanges Active</h3>
+              <p>Turn your idle implements into access to other machinery without buying new assets.</p>
+              <button id="btn-empty-propose" class="btn btn-secondary">+ Propose First Swap</button>
+            </div>
+          `;
+          document.getElementById('btn-empty-propose')?.addEventListener('click', openProposeModal);
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Proposal Ref</th>
+                  <th>Participants</th>
+                  <th>Equipments Swapped</th>
+                  <th>Cash Adjustment</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${list.map(x => `
+                  <tr>
+                    <td><strong>${x.proposal_reference}</strong></td>
+                    <td>
+                      ${x.proposer?.full_name} ↔ ${x.recipient?.full_name}<br>
+                      <small style="color:#666;">${x.proposer_id === user.id ? '(You proposed)' : '(Received offer)'}</small>
+                    </td>
+                    <td>
+                      ${x.items?.map(it => `
+                        <div>• ${it.equipment?.title || 'Machine'} <small style="color:#666;">(${new Date(it.start_time).toLocaleDateString('en-IN')})</small></div>
+                      `).join('')}
+                    </td>
+                    <td>${x.cash_adjustment_amount > 0 ? `₹${x.cash_adjustment_amount}` : 'None (Direct Swap)'}</td>
+                    <td>
+                      <span class="badge badge-${x.status}">${x.status.toUpperCase()}</span>
+                    </td>
+                    <td>
+                      <div style="display:flex; gap:6px;">
+                        ${['proposed', 'countered'].includes(x.status) && x.proposer_id !== user.id ? `
+                          <button class="btn btn-primary btn-sm accept-xch-btn" data-id="${x.id}">Accept & Lock Schedules</button>
+                          <button class="btn btn-outline btn-sm counter-xch-btn" data-id="${x.id}">Counter</button>
+                        ` : ''}
+                        ${['proposed', 'countered'].includes(x.status) && x.proposer_id === user.id ? `
+                          <span style="font-size:0.8rem; color:#888;">Awaiting partner response</span>
+                        ` : ''}
+                        ${x.status === 'confirmed' ? `
+                          <span class="badge badge-confirmed">🔒 Schedules Locked</span>
+                        ` : ''}
+                      </div>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+
+        // Event listeners for accept/counter
+        document.querySelectorAll('.accept-xch-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const xId = btn.getAttribute('data-id');
+            try {
+              await Api.post(`/exchanges/${xId}/accept`);
+              Toast.success('Exchange accepted! Machinery schedules locked atomically.');
+              loadExchanges();
+            } catch (err) {
+              Toast.error(err.message);
+            }
+          });
+        });
+
+        document.querySelectorAll('.counter-xch-btn').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const xId = btn.getAttribute('data-id');
+            const notes = prompt('Enter your counteroffer terms:');
+            if (notes === null) return;
+            const cash = prompt('Adjust cash settlement (₹) or leave blank for 0:', '0');
+            try {
+              await Api.post(`/exchanges/${xId}/counteroffer`, {
+                notes,
+                cashAdjustmentAmount: parseFloat(cash) || 0
+              });
+              Toast.success('Counteroffer dispatched to participant.');
+              loadExchanges();
+            } catch (err) {
+              Toast.error(err.message);
+            }
+          });
+        });
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><p style="color:var(--color-status-cancelled);">${err.message}</p></div>`;
+      }
+    }
+
+    async function openProposeModal() {
+      // Load user's own equipment
+      const myRes = await Api.get('/equipment', { owner: user.id });
+      const myEquip = myRes.data.items || [];
+
+      // Load all available equipment
+      const allRes = await Api.get('/equipment', { exchange: 'true', limit: 20 });
+      const allEquip = (allRes.data.items || []).filter(e => e.owner_id !== user.id);
+
+      if (myEquip.length === 0) {
+        Toast.warning('You must list at least one machinery item first before proposing an exchange.');
+        setTimeout(() => { window.location.href = '/add-equipment.html'; }, 1500);
+        return;
+      }
+
+      document.getElementById('xch-my-equip').innerHTML = myEquip.map(e => `
+        <option value="${e.id}">${e.title} (${e.district})</option>
+      `).join('');
+
+      document.getElementById('xch-target-equip').innerHTML = allEquip.map(e => `
+        <option value="${e.id}">${e.title} - Owner: ${e.owner_name} (${e.district})</option>
+      `).join('');
+
+      Modal.open('modal-propose-exchange');
+      updateMatchScore();
+    }
+
+    document.getElementById('btn-new-exchange').onclick = openProposeModal;
+
+    async function updateMatchScore() {
+      const offeredId = document.getElementById('xch-my-equip').value;
+      const requestedId = document.getElementById('xch-target-equip').value;
+      if (!offeredId || !requestedId) return;
+
+      try {
+        const res = await Api.get('/exchanges/match-score', { offeredId, requestedId });
+        const data = res.data;
+        document.getElementById('match-score-badge').textContent = `Match Score: ${data.score}%`;
+        document.getElementById('match-reasons-list').innerHTML = data.reasons.map(r => `<li>${r}</li>`).join('');
+      } catch {
+        // quiet fallback
+      }
+    }
+
+    document.getElementById('xch-my-equip').addEventListener('change', updateMatchScore);
+    document.getElementById('xch-target-equip').addEventListener('change', updateMatchScore);
+
+    // Form submission
+    document.getElementById('propose-exchange-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const payload = {
+          offeredEquipmentId: document.getElementById('xch-my-equip').value,
+          requestedEquipmentId: document.getElementById('xch-target-equip').value,
+          offeredStartTime: document.getElementById('xch-my-start').value,
+          offeredEndTime: document.getElementById('xch-my-end').value,
+          requestedStartTime: document.getElementById('xch-target-start').value,
+          requestedEndTime: document.getElementById('xch-target-end').value,
+          cashAdjustmentAmount: parseFloat(document.getElementById('xch-cash-adj').value) || 0,
+          notes: document.getElementById('xch-notes').value.trim()
+        };
+
+        const res = await Api.post('/exchanges', payload);
+        Toast.success('Exchange proposal dispatched! Ref: ' + res.data.exchange.proposal_reference);
+        Modal.close('modal-propose-exchange');
+        loadExchanges();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadExchanges();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Farmer Dashboard — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <!-- Greeting & Header -->
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: var(--space-8);">
+        <div>
+          <h1 style="margin-bottom: 4px;">Kisan Dashboard</h1>
+          <p style="margin-bottom: 0;">Welcome, <strong id="greeting-name">Farmer</strong>! Manage your rentals, machinery listings, and equipment exchanges.</p>
+        </div>
+        <div style="display:flex; gap:12px;">
+          <a href="/add-equipment.html" class="btn btn-secondary">+ List New Machinery</a>
+          <a href="/equipment.html" class="btn btn-outline">🔍 Find Equipment</a>
+        </div>
+      </div>
+
+      <!-- Quick Metrics -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <span class="metric-label">My Upcoming Rentals</span>
+          <span class="metric-value" id="stat-renter-bookings">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">My Listed Machinery</span>
+          <span class="metric-value" id="stat-owner-listings">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Pending Owner Requests</span>
+          <span class="metric-value" id="stat-pending-requests" style="color:var(--color-status-pending);">0</span>
+        </div>
+        <div class="metric-card">
+          <span class="metric-label">Active Exchanges</span>
+          <span class="metric-value" id="stat-active-exchanges" style="color:var(--color-secondary);">0</span>
+        </div>
+      </div>
+
+      <!-- Dashboard Tabs -->
+      <div class="tabs-nav">
+        <button class="tab-btn active" data-tab="tab-renter">🚜 My Rentals (As Renter)</button>
+        <button class="tab-btn" data-tab="tab-owner-requests">📥 Incoming Requests (As Owner)</button>
+        <button class="tab-btn" data-tab="tab-owner-listings">🚜 My Equipment Listings</button>
+        <button class="tab-btn" data-tab="tab-exchanges">🔄 Idle-Time Exchanges</button>
+      </div>
+
+      <!-- Tab 1: Renter Bookings -->
+      <div id="tab-renter" class="tab-pane active">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">My Equipment Reservations</h3>
+            <a href="/equipment.html" class="btn btn-primary btn-sm">+ Book Machinery</a>
+          </div>
+          <div class="card-body" id="renter-bookings-container">
+            <div class="empty-state"><p>Loading reservations...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 2: Owner Incoming Requests -->
+      <div id="tab-owner-requests" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">Incoming Booking Requests For My Machinery</h3>
+          </div>
+          <div class="card-body" id="owner-requests-container">
+            <div class="empty-state"><p>Loading requests...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Owner Listings -->
+      <div id="tab-owner-listings" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">My Published Machinery</h3>
+            <a href="/add-equipment.html" class="btn btn-secondary btn-sm">+ Add New Listing</a>
+          </div>
+          <div class="card-body" id="owner-listings-container">
+            <div class="empty-state"><p>Loading equipment...</p></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 4: Idle-Time Exchanges -->
+      <div id="tab-exchanges" class="tab-pane">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="font-size: 1.15rem; margin-bottom: 0;">My Equipment Exchange Proposals</h3>
+            <a href="/exchanges.html" class="btn btn-primary btn-sm">Exchange Center</a>
+          </div>
+          <div class="card-body" id="exchanges-container">
+            <div class="empty-state"><p>Loading exchange proposals...</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    // Guard page
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const user = Auth.getUser();
+    document.getElementById('greeting-name').textContent = user?.profile?.full_name || 'Farmer';
+
+    // Tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+
+    async function loadDashboardData() {
+      try {
+        // Load Renter Bookings
+        const renterRes = await Api.get('/bookings', { role: 'renter' });
+        const renterBookings = renterRes.data.bookings || [];
+        document.getElementById('stat-renter-bookings').textContent = renterBookings.length;
+
+        const renterContainer = document.getElementById('renter-bookings-container');
+        if (renterBookings.length === 0) {
+          renterContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🚜</div>
+              <h3>No Active Equipment Reservations</h3>
+              <p>Explore nearby tractors, rotavators, and harvesters for your farm.</p>
+              <a href="/equipment.html" class="btn btn-primary">Find Equipment</a>
+            </div>
+          `;
+        } else {
+          renterContainer.innerHTML = `
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ref / Machine</th>
+                    <th>Rental Window</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${renterBookings.map(b => `
+                    <tr>
+                      <td>
+                        <strong>${b.booking_reference}</strong><br>
+                        <a href="/equipment-details.html?id=${b.equipment_id}">${b.equipment?.title || 'Machinery'}</a>
+                      </td>
+                      <td>
+                        <small>${new Date(b.start_time).toLocaleDateString('en-IN')} &rarr; ${new Date(b.end_time).toLocaleDateString('en-IN')}</small><br>
+                        <span style="font-size:0.75rem; color:#666;">(${b.rental_duration_hours} hrs)</span>
+                      </td>
+                      <td><strong>₹${b.total_amount}</strong></td>
+                      <td>
+                        <span class="badge ${b.payment_status === 'captured' ? 'badge-available' : 'badge-pending'}">${b.payment_method.replace('_', ' ')} (${b.payment_status})</span>
+                      </td>
+                      <td>
+                        <span class="badge badge-${b.status}">${b.status.replace('_', ' ')}</span>
+                      </td>
+                      <td>
+                        <a href="/booking-details.html?id=${b.id}" class="btn btn-outline btn-sm">Details</a>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+
+        // Load Owner Requests
+        const ownerRequestsRes = await Api.get('/bookings', { role: 'owner' });
+        const ownerBookings = ownerRequestsRes.data.bookings || [];
+        const pendingCount = ownerBookings.filter(b => b.status === 'pending_owner').length;
+        document.getElementById('stat-pending-requests').textContent = pendingCount;
+
+        const ownerRequestsContainer = document.getElementById('owner-requests-container');
+        if (ownerBookings.length === 0) {
+          ownerRequestsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">📥</div>
+              <h3>No Incoming Requests Yet</h3>
+              <p>When nearby farmers book your listed equipment, requests will appear here for your approval.</p>
+            </div>
+          `;
+        } else {
+          ownerRequestsContainer.innerHTML = `
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ref / Machine</th>
+                    <th>Renter</th>
+                    <th>Dates</th>
+                    <th>Earnings</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${ownerBookings.map(b => `
+                    <tr>
+                      <td>
+                        <strong>${b.booking_reference}</strong><br>
+                        ${b.equipment?.title || 'Machinery'}
+                      </td>
+                      <td>
+                        ${b.renter?.full_name || 'Farmer'}<br>
+                        <small style="color:#666;">📞 ${b.renter?.phone_number || '---'}</small>
+                      </td>
+                      <td>
+                        <small>${new Date(b.start_time).toLocaleDateString('en-IN')} &rarr; ${new Date(b.end_time).toLocaleDateString('en-IN')}</small>
+                      </td>
+                      <td><strong style="color:var(--color-primary);">₹${b.base_rental_amount + (b.delivery_fee || 0)}</strong></td>
+                      <td><span class="badge badge-${b.status}">${b.status.replace('_', ' ')}</span></td>
+                      <td>
+                        <div style="display:flex; gap:6px;">
+                          ${b.status === 'pending_owner' ? `
+                            <button class="btn btn-primary btn-sm approve-booking-btn" data-id="${b.id}">Approve</button>
+                            <button class="btn btn-danger btn-sm reject-booking-btn" data-id="${b.id}">Decline</button>
+                          ` : `
+                            <a href="/booking-details.html?id=${b.id}" class="btn btn-outline btn-sm">Manage</a>
+                          `}
+                        </div>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+
+          // Event listeners for quick approve/reject
+          document.querySelectorAll('.approve-booking-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const bId = btn.getAttribute('data-id');
+              try {
+                await Api.post(`/bookings/${bId}/approve`);
+                Toast.success('Booking approved!');
+                loadDashboardData();
+              } catch (err) {
+                Toast.error(err.message);
+              }
+            });
+          });
+
+          document.querySelectorAll('.reject-booking-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+              const bId = btn.getAttribute('data-id');
+              const reason = prompt('Reason for declining this booking request:');
+              if (reason === null) return;
+              try {
+                await Api.post(`/bookings/${bId}/reject`, { reason });
+                Toast.warning('Booking declined');
+                loadDashboardData();
+              } catch (err) {
+                Toast.error(err.message);
+              }
+            });
+          });
+        }
+
+        // Load Owner Equipment Listings
+        const equipRes = await Api.get('/equipment', { owner: user.id });
+        const myListings = equipRes.data.items || [];
+        document.getElementById('stat-owner-listings').textContent = myListings.length;
+
+        const listingsContainer = document.getElementById('owner-listings-container');
+        if (myListings.length === 0) {
+          listingsContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🚜</div>
+              <h3>You Have Not Listed Any Machinery Yet</h3>
+              <p>Turn your idle tractor, rotavator, or harvester into a source of seasonal revenue.</p>
+              <a href="/add-equipment.html" class="btn btn-secondary">+ List Your First Machine</a>
+            </div>
+          `;
+        } else {
+          listingsContainer.innerHTML = `
+            <div class="grid grid-cols-3">
+              ${myListings.map(item => `
+                <div class="card equipment-card">
+                  <div class="equipment-card-media" style="height:140px;">
+                    <img src="${item.images[0]?.image_url || '/assets/images/tractor.svg'}" alt="${item.title}">
+                    <span class="badge ${item.is_published ? 'badge-available' : 'badge-cancelled'} equipment-card-badge-top">
+                      ${item.is_published ? 'Published' : 'Unpublished'}
+                    </span>
+                  </div>
+                  <div class="card-body" style="padding:16px;">
+                    <h4 style="font-size:1rem; margin-bottom:4px;">${item.title}</h4>
+                    <p style="font-size:0.8rem; margin-bottom:8px;">₹${item.pricing?.daily_rate || '---'}/day</p>
+                    <div style="display:flex; gap:8px;">
+                      <a href="/edit-equipment.html?id=${item.id}" class="btn btn-outline btn-sm" style="flex:1;">Edit</a>
+                      <a href="/maintenance.html?id=${item.id}" class="btn btn-sm" style="background:#f4efe6;">Service Log</a>
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        // Load Exchanges
+        const xchRes = await Api.get('/exchanges');
+        const exchanges = xchRes.data.exchanges || [];
+        document.getElementById('stat-active-exchanges').textContent = exchanges.filter(x => ['accepted', 'confirmed'].includes(x.status)).length;
+
+        const xchContainer = document.getElementById('exchanges-container');
+        if (exchanges.length === 0) {
+          xchContainer.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🔄</div>
+              <h3>No Idle-Time Exchanges Active</h3>
+              <p>Swap access to your underutilized machinery with other local farmers during off-peak times.</p>
+              <a href="/exchanges.html" class="btn btn-outline">Go to Exchange Hub</a>
+            </div>
+          `;
+        } else {
+          xchContainer.innerHTML = `
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ref</th>
+                    <th>Participants</th>
+                    <th>Equipment Involved</th>
+                    <th>Cash Adjustment</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${exchanges.map(x => `
+                    <tr>
+                      <td><strong>${x.proposal_reference}</strong></td>
+                      <td>${x.proposer?.full_name} ↔ ${x.recipient?.full_name}</td>
+                      <td>${x.items?.map(it => it.equipment?.title || 'Equipment').join(' for ')}</td>
+                      <td>${x.cash_adjustment_amount > 0 ? `₹${x.cash_adjustment_amount}` : 'Zero Cash (Pure Swap)'}</td>
+                      <td><span class="badge badge-${x.status}">${x.status}</span></td>
+                      <td><a href="/exchanges.html?id=${x.id}" class="btn btn-outline btn-sm">View Agreement</a></td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }
+      } catch (err) {
+        Toast.error('Failed to load dashboard: ' + err.message);
+      }
+    }
+
+    loadDashboardData();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipment Details — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 8px;">
+        <a href="/">Home</a> &rsaquo; <a href="/equipment.html">Marketplace</a> &rsaquo; <span id="breadcrumb-title">Machinery</span>
+      </p>
+
+      <div class="details-grid">
+        <!-- Left Content -->
+        <div>
+          <div class="details-gallery" id="gallery-container">
+            <img id="main-image" src="/assets/images/tractor.svg" alt="Equipment photo">
+          </div>
+
+          <div style="display:flex; gap:8px; align-items:center; margin-bottom: 12px;">
+            <span class="badge badge-available" id="badge-type">Agricultural Equipment</span>
+            <span class="badge badge-verified" id="badge-verified">✓ Verified Machinery</span>
+            <span class="badge badge-exchange" id="badge-exchange" style="display:none;">🔄 Exchange Eligible</span>
+          </div>
+
+          <h1 id="equip-title" style="margin-bottom: 8px;">Loading Machinery...</h1>
+          <p id="equip-location" style="font-size: var(--font-size-base); color: var(--color-text-secondary); margin-bottom: 24px;">
+            📍 Approximate Location: Village/District, State
+          </p>
+
+          <!-- Specifications Table -->
+          <div class="card" style="margin-bottom: var(--space-8);">
+            <div class="card-header">
+              <h3 style="font-size: 1.15rem; margin-bottom: 0;">Technical Specifications</h3>
+            </div>
+            <div class="card-body" style="padding: 0;">
+              <table class="table" id="specs-table">
+                <tbody>
+                  <!-- Injected via JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="card" style="margin-bottom: var(--space-8);">
+            <div class="card-header">
+              <h3 style="font-size: 1.15rem; margin-bottom: 0;">Machine Description</h3>
+            </div>
+            <div class="card-body">
+              <p id="equip-description" style="line-height: 1.7; white-space: pre-line;"></p>
+            </div>
+          </div>
+
+          <!-- Owner Profile -->
+          <div class="card" style="margin-bottom: var(--space-8);">
+            <div class="card-header">
+              <h3 style="font-size: 1.15rem; margin-bottom: 0;">Equipment Owner / Provider</h3>
+            </div>
+            <div class="card-body" style="display:flex; justify-content:space-between; align-items:center;">
+              <div>
+                <h4 id="owner-name" style="margin-bottom: 4px;">Owner Name</h4>
+                <p id="owner-location" style="font-size: var(--font-size-sm); margin-bottom: 0;">District, State</p>
+              </div>
+              <a href="/messages.html" id="contact-owner-btn" class="btn btn-outline btn-sm">💬 Send Message</a>
+            </div>
+          </div>
+
+          <!-- Reviews Section -->
+          <div class="card">
+            <div class="card-header" style="display:flex; justify-content:space-between; align-items:center;">
+              <h3 style="font-size: 1.15rem; margin-bottom: 0;">Completed Rental Reviews</h3>
+              <span id="review-score-badge" class="badge badge-available">★ 5.0</span>
+            </div>
+            <div class="card-body" id="reviews-container">
+              <p style="color:var(--color-text-muted);">No reviews submitted yet for this machinery.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Booking & Quote Box -->
+        <div>
+          <div class="quote-calculator-box">
+            <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:16px;">
+              <div>
+                <span id="rate-display" style="font-size:1.75rem; font-weight:bold; color:var(--color-primary);">₹--</span>
+                <span style="font-size:0.9rem; color:var(--color-text-secondary);">/day</span>
+              </div>
+              <span id="hourly-rate-display" style="font-size:0.85rem; color:#666;"></span>
+            </div>
+
+            <form id="booking-form">
+              <div class="form-group">
+                <label for="book-start">Start Date & Time</label>
+                <input type="datetime-local" id="book-start" required>
+              </div>
+
+              <div class="form-group">
+                <label for="book-end">End Date & Time</label>
+                <input type="datetime-local" id="book-end" required>
+              </div>
+
+              <div class="form-group">
+                <label for="book-handover">Handover Method</label>
+                <select id="book-handover">
+                  <option value="pickup">Self-Pickup from Farm</option>
+                  <option value="owner_delivery">Delivery to Field</option>
+                </select>
+              </div>
+
+              <div id="delivery-details-group" class="form-group" style="display:none;">
+                <label for="book-delivery-dist">Delivery Distance (KM)</label>
+                <input type="number" id="book-delivery-dist" min="1" max="50" value="5">
+                <span class="form-hint" id="delivery-rate-hint">Delivery fee applies</span>
+              </div>
+
+              <div class="form-group">
+                <label for="book-payment">Payment Method</label>
+                <select id="book-payment">
+                  <option value="cash_on_pickup">Cash on Handover / Pickup</option>
+                  <option value="online">Online Payment (Card/UPI/Netbanking)</option>
+                </select>
+              </div>
+
+              <!-- Realtime Itemized Price Breakdown -->
+              <div id="quote-breakdown" style="background:#faf8f5; border:1px solid var(--color-border-light); border-radius:var(--radius-md); padding:12px; margin: 16px 0;">
+                <div style="font-size:0.75rem; text-transform:uppercase; color:var(--color-text-muted); font-weight:bold; margin-bottom:8px;">Price Breakdown</div>
+                <div id="quote-line-items">
+                  <div style="font-size:0.85rem; color:#888;">Select booking dates to calculate quote...</div>
+                </div>
+                <div class="quote-total-row">
+                  <span>Authoritative Total</span>
+                  <span id="quote-total-val">₹0.00</span>
+                </div>
+              </div>
+
+              <button type="submit" id="submit-booking-btn" class="btn btn-primary btn-block btn-lg" style="margin-bottom:12px;">
+                Request Booking
+              </button>
+
+              <button type="button" id="open-exchange-btn" class="btn btn-secondary btn-block" style="display:none;">
+                🔄 Propose Idle-Time Exchange
+              </button>
+            </form>
+
+            <p style="font-size:0.75rem; color:var(--color-text-muted); text-align:center; margin-top:12px; margin-bottom:0;">
+              🔒 PostgreSQL transaction locked: no overlapping double bookings possible.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Api } from '/assets/js/api.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const equipId = urlParams.get('id');
+
+    if (!equipId) {
+      window.location.href = '/equipment.html';
+    }
+
+    let currentEquipment = null;
+
+    // Set default dates: tomorrow 08:00 to tomorrow + 1 day 18:00
+    const now = new Date();
+    const tomorrow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+    tomorrow.setHours(8, 0, 0, 0);
+    const dayAfter = new Date(tomorrow.getTime() + 28 * 60 * 60 * 1000);
+
+    const pad = (n) => String(n).padStart(2, '0');
+    const formatDt = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+
+    document.getElementById('book-start').value = formatDt(tomorrow);
+    document.getElementById('book-end').value = formatDt(dayAfter);
+
+    async function loadDetails() {
+      try {
+        const res = await Api.get(`/equipment/${equipId}`);
+        const item = res.data.equipment;
+        currentEquipment = item;
+
+        document.title = `${item.title} — FarmSharw`;
+        document.getElementById('breadcrumb-title').textContent = item.title;
+        document.getElementById('equip-title').textContent = item.title;
+        document.getElementById('equip-description').textContent = item.description;
+        document.getElementById('badge-type').textContent = item.equipment_type;
+
+        // Image
+        if (item.images && item.images.length > 0) {
+          document.getElementById('main-image').src = item.images[0].image_url;
+        }
+
+        // Location & Privacy check
+        if (item.exact_address) {
+          document.getElementById('equip-location').innerHTML = `📍 <strong>Exact Pickup Address:</strong> ${item.exact_address}, ${item.village_or_town}, ${item.district} (${item.pin_code})`;
+        } else {
+          document.getElementById('equip-location').innerHTML = `📍 <strong>Approximate Location:</strong> ${item.village_or_town}, ${item.district}, ${item.state} (PIN: ${item.pin_code}) <small style="display:block; color:#888;">Exact farm address disclosed upon confirmed booking</small>`;
+        }
+
+        // Pricing Rates
+        document.getElementById('rate-display').textContent = `₹${item.pricing?.daily_rate || '---'}`;
+        if (item.pricing?.hourly_rate) {
+          document.getElementById('hourly-rate-display').textContent = `Hourly: ₹${item.pricing.hourly_rate}/hr`;
+        }
+
+        // Exchange Eligible
+        if (item.is_exchange_eligible) {
+          document.getElementById('badge-exchange').style.display = 'inline-flex';
+          document.getElementById('open-exchange-btn').style.display = 'block';
+        }
+
+        // Delivery
+        if (item.delivery_offered) {
+          document.getElementById('delivery-rate-hint').textContent = `Owner offers delivery up to ${item.max_delivery_radius_km} km @ ₹${item.delivery_fee_per_km}/km`;
+        }
+
+        // Owner
+        if (item.owner) {
+          document.getElementById('owner-name').textContent = item.owner.full_name;
+          document.getElementById('owner-location').textContent = `${item.owner.district || item.district}, ${item.owner.state || item.state}`;
+        }
+
+        // Specs table
+        const specsBody = document.querySelector('#specs-table tbody');
+        const rows = [
+          ['Category', item.category?.name || 'Machinery'],
+          ['Manufacturer', item.manufacturer || 'Standard'],
+          ['Model', item.model || 'Standard'],
+          ['Manufacture Year', item.manufacture_year || 'N/A'],
+          ['Horsepower', item.hp_power ? `${item.hp_power} HP` : 'N/A'],
+          ['Condition', item.condition.toUpperCase()],
+          ['Booking Policy', item.booking_approval_policy === 'instant' ? 'Instant Confirmation' : 'Owner Approval Required'],
+          ['Min Rental Duration', `${item.min_rental_hours} hours`]
+        ];
+
+        specsBody.innerHTML = rows.map(([label, val]) => `
+          <tr>
+            <td style="width: 40%; font-weight:600; color:var(--color-primary-dark);">${label}</td>
+            <td>${val}</td>
+          </tr>
+        `).join('');
+
+        // Recalculate quote
+        recalculateQuote();
+      } catch (err) {
+        Toast.error('Could not load equipment details: ' + err.message);
+      }
+    }
+
+    // Toggle delivery inputs
+    document.getElementById('book-handover').addEventListener('change', (e) => {
+      document.getElementById('delivery-details-group').style.display = e.target.value === 'owner_delivery' ? 'block' : 'none';
+      recalculateQuote();
+    });
+
+    document.getElementById('book-start').addEventListener('change', recalculateQuote);
+    document.getElementById('book-end').addEventListener('change', recalculateQuote);
+    document.getElementById('book-delivery-dist').addEventListener('input', recalculateQuote);
+
+    async function recalculateQuote() {
+      if (!currentEquipment) return;
+
+      const startTime = document.getElementById('book-start').value;
+      const endTime = document.getElementById('book-end').value;
+      const handoverMethod = document.getElementById('book-handover').value;
+      const deliveryDistanceKm = parseFloat(document.getElementById('book-delivery-dist').value) || 0;
+
+      try {
+        const res = await Api.post('/bookings/quote', {
+          equipmentId: equipId,
+          startTime,
+          endTime,
+          handoverMethod,
+          deliveryDistanceKm
+        });
+
+        const { quote, isAvailable, conflictDetails } = res.data;
+
+        if (!isAvailable) {
+          document.getElementById('quote-line-items').innerHTML = `
+            <div style="color:var(--color-status-cancelled); font-size:0.85rem; font-weight:bold;">
+              ⚠️ Conflict: ${conflictDetails}
+            </div>
+          `;
+          document.getElementById('submit-booking-btn').disabled = true;
+          return;
+        }
+
+        document.getElementById('submit-booking-btn').disabled = false;
+        document.getElementById('quote-line-items').innerHTML = quote.lineItems.map(item => `
+          <div class="quote-breakdown-row">
+            <span>${item.description}</span>
+            <span>₹${item.amount.toFixed(2)}</span>
+          </div>
+        `).join('');
+
+        document.getElementById('quote-total-val').textContent = `₹${quote.totalAmount.toFixed(2)}`;
+      } catch (err) {
+        document.getElementById('quote-line-items').innerHTML = `
+          <div style="color:var(--color-status-cancelled); font-size:0.85rem;">${err.message}</div>
+        `;
+        document.getElementById('submit-booking-btn').disabled = true;
+      }
+    }
+
+    // Booking Submission
+    document.getElementById('booking-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!Auth.isLoggedIn()) {
+        window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        return;
+      }
+
+      const payload = {
+        equipmentId: equipId,
+        startTime: document.getElementById('book-start').value,
+        endTime: document.getElementById('book-end').value,
+        handoverMethod: document.getElementById('book-handover').value,
+        deliveryDistanceKm: parseFloat(document.getElementById('book-delivery-dist').value) || 0,
+        paymentMethod: document.getElementById('book-payment').value
+      };
+
+      try {
+        const res = await Api.post('/bookings', payload);
+        Toast.success('Booking requested successfully! Ref: ' + res.data.booking.booking_reference);
+        setTimeout(() => {
+          window.location.href = `/bookings.html?id=${res.data.booking.id}`;
+        }, 1200);
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    document.getElementById('open-exchange-btn').addEventListener('click', () => {
+      if (!Auth.isLoggedIn()) {
+        window.location.href = `/login.html?redirect=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+        return;
+      }
+      window.location.href = `/exchanges.html?targetEquipId=${equipId}`;
+    });
+
+    loadDetails();
+  </script>
+</body>
+</html>
+

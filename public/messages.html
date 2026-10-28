@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Messages & Farmer Inquiries — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <div style="margin-bottom: 24px;">
+        <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+          <a href="/dashboard.html">Dashboard</a> &rsaquo; Messages
+        </p>
+        <h1 style="margin-bottom: 0;">In-App Conversations</h1>
+        <p style="color:var(--color-text-secondary); margin-bottom: 0;">
+          Communicate with equipment owners and renters regarding handovers, logistics, and exchange details.
+        </p>
+      </div>
+
+      <div class="chat-container">
+        <!-- Sidebar Conversation List -->
+        <div class="chat-sidebar" id="conversations-sidebar">
+          <div style="padding:16px; border-bottom:1px solid var(--color-border-light); font-weight:bold; font-size:0.9rem; background:#faf8f5;">
+            Conversations
+          </div>
+          <div id="conversations-list">
+            <div style="padding:24px; text-align:center; color:#888; font-size:0.85rem;">Loading chats...</div>
+          </div>
+        </div>
+
+        <!-- Main Chat Area -->
+        <div class="chat-main" id="chat-active-window">
+          <div style="padding:16px 24px; border-bottom:1px solid var(--color-border-light); background:#fff; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <h4 id="chat-partner-name" style="margin-bottom:2px; font-size:1.1rem;">Select a Conversation</h4>
+              <p id="chat-subject" style="margin-bottom:0; font-size:0.8rem; color:#666;">Choose a farmer thread from the left</p>
+            </div>
+          </div>
+
+          <div class="chat-messages-area" id="messages-stream">
+            <div style="margin:auto; text-align:center; color:#888;">
+              <span style="font-size:2.5rem;">💬</span>
+              <p style="margin-top:8px;">No conversation selected</p>
+            </div>
+          </div>
+
+          <form id="send-message-form" class="chat-input-bar">
+            <input type="text" id="message-text-input" placeholder="Type a message to the farmer..." required style="flex:1;">
+            <button type="submit" class="btn btn-primary" style="height:42px;">Send Message</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const user = Auth.getUser();
+    let activeConvoId = null;
+
+    async function loadConversations() {
+      const listEl = document.getElementById('conversations-list');
+      try {
+        const res = await Api.get('/conversations');
+        const convos = res.data.conversations || [];
+
+        if (convos.length === 0) {
+          listEl.innerHTML = `
+            <div style="padding:32px 16px; text-align:center; color:#888; font-size:0.85rem;">
+              No conversations yet. Inquire about equipment from the marketplace to begin chatting.
+            </div>
+          `;
+          return;
+        }
+
+        listEl.innerHTML = convos.map(c => {
+          const other = c.participants.find(p => p.userId !== user.id) || { fullName: 'Farmer' };
+          return `
+            <div class="chat-thread-item ${c.id === activeConvoId ? 'active' : ''}" data-id="${c.id}">
+              <div style="font-weight:600; font-size:0.9rem; color:var(--color-primary-dark);">${other.fullName}</div>
+              <div style="font-size:0.8rem; color:#555; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">
+                ${c.subject || 'Equipment inquiry'}
+              </div>
+              <div style="font-size:0.75rem; color:#888; margin-top:4px;">
+                ${c.lastMessage ? c.lastMessage.body : 'No messages yet'}
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        document.querySelectorAll('.chat-thread-item').forEach(el => {
+          el.addEventListener('click', () => {
+            selectConversation(el.getAttribute('data-id'));
+          });
+        });
+
+        // Auto select first
+        if (!activeConvoId && convos.length > 0) {
+          selectConversation(convos[0].id);
+        }
+      } catch (err) {
+        listEl.innerHTML = `<div style="padding:16px; color:red;">${err.message}</div>`;
+      }
+    }
+
+    async function selectConversation(convoId) {
+      activeConvoId = convoId;
+      document.querySelectorAll('.chat-thread-item').forEach(el => {
+        el.classList.toggle('active', el.getAttribute('data-id') === convoId);
+      });
+
+      const stream = document.getElementById('messages-stream');
+      stream.innerHTML = '<div style="margin:auto; color:#888;">Loading messages...</div>';
+
+      try {
+        const res = await Api.get(`/conversations/${convoId}/messages`);
+        const messages = res.data.messages || [];
+
+        if (messages.length === 0) {
+          stream.innerHTML = '<div style="margin:auto; color:#888;">Say hello to start the conversation!</div>';
+        } else {
+          stream.innerHTML = messages.map(m => {
+            const isMine = m.sender_id === user.id;
+            return `
+              <div class="chat-bubble ${isMine ? 'sent' : 'received'}">
+                <div style="font-size:0.7rem; opacity:0.8; margin-bottom:2px;">${isMine ? 'You' : m.sender_name}</div>
+                <div>${m.body}</div>
+                <div style="font-size:0.65rem; opacity:0.7; text-align:right; margin-top:4px;">
+                  ${new Date(m.created_at).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}
+                </div>
+              </div>
+            `;
+          }).join('');
+          stream.scrollTop = stream.scrollHeight;
+        }
+      } catch (err) {
+        stream.innerHTML = `<div style="color:red; margin:auto;">${err.message}</div>`;
+      }
+    }
+
+    document.getElementById('send-message-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!activeConvoId) {
+        Toast.warning('Please select a conversation first.');
+        return;
+      }
+
+      const input = document.getElementById('message-text-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      try {
+        await Api.post(`/conversations/${activeConvoId}/messages`, { body: text });
+        input.value = '';
+        selectConversation(activeConvoId);
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadConversations();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Equipment — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 760px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; Edit Machinery
+      </p>
+      <h1>Edit Equipment Listing</h1>
+
+      <div class="card" style="padding: var(--space-8); margin-top: 24px;">
+        <form id="edit-equipment-form">
+          <div class="form-group">
+            <label for="edit-title">Title</label>
+            <input type="text" id="edit-title" required>
+          </div>
+
+          <div class="form-group">
+            <label for="edit-desc">Description</label>
+            <textarea id="edit-desc" rows="4" required></textarea>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="edit-condition">Condition</label>
+              <select id="edit-condition">
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="edit-status">Operational Status</label>
+              <select id="edit-status">
+                <option value="operational">Operational</option>
+                <option value="under_maintenance">Under Maintenance (Blocks new bookings)</option>
+                <option value="decommissioned">Decommissioned</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="edit-min-hours">Min Rental Hours</label>
+              <input type="number" id="edit-min-hours" min="1" max="24">
+            </div>
+            <div class="form-group">
+              <label for="edit-policy">Approval Policy</label>
+              <select id="edit-policy">
+                <option value="manual">Manual Owner Review</option>
+                <option value="instant">Instant Auto-Confirmation</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="edit-published" checked>
+              <span>Listing is Published & Visible in Marketplace</span>
+            </label>
+          </div>
+
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="edit-exchange">
+              <span>Eligible for Idle-Time Equipment Exchange</span>
+            </label>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 24px;">
+            Save Listing Changes
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const equipId = urlParams.get('id');
+
+    async function loadEquipment() {
+      try {
+        const res = await Api.get(`/equipment/${equipId}`);
+        const item = res.data.equipment;
+
+        document.getElementById('edit-title').value = item.title;
+        document.getElementById('edit-desc').value = item.description;
+        document.getElementById('edit-condition').value = item.condition;
+        document.getElementById('edit-status').value = item.maintenance_status;
+        document.getElementById('edit-min-hours').value = item.min_rental_hours;
+        document.getElementById('edit-policy').value = item.booking_approval_policy;
+        document.getElementById('edit-published').checked = item.is_published;
+        document.getElementById('edit-exchange').checked = item.is_exchange_eligible;
+      } catch (err) {
+        Toast.error('Could not load equipment: ' + err.message);
+      }
+    }
+
+    document.getElementById('edit-equipment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await Api.patch(`/equipment/${equipId}`, {
+          title: document.getElementById('edit-title').value.trim(),
+          description: document.getElementById('edit-desc').value.trim(),
+          condition: document.getElementById('edit-condition').value,
+          maintenanceStatus: document.getElementById('edit-status').value,
+          minRentalHours: parseInt(document.getElementById('edit-min-hours').value),
+          bookingApprovalPolicy: document.getElementById('edit-policy').value,
+          isPublished: document.getElementById('edit-published').checked,
+          isExchangeEligible: document.getElementById('edit-exchange').checked
+        });
+        Toast.success('Equipment updated successfully!');
+        setTimeout(() => {
+          window.location.href = `/equipment-details.html?id=${equipId}`;
+        }, 1000);
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadEquipment();
+  </script>
+</body>
+</html>
+

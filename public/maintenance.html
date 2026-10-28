@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Equipment Maintenance & Service Logs — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 860px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; Maintenance Logs
+      </p>
+      <h1 id="page-title">Machinery Service & Maintenance History</h1>
+      <p style="color:var(--color-text-secondary); margin-bottom: var(--space-8);">
+        Keep machine maintenance records transparent. Marking equipment under maintenance automatically protects farmers from double bookings.
+      </p>
+
+      <!-- Log Service Form -->
+      <div class="card" style="padding: var(--space-6); margin-bottom: 32px;">
+        <h3 style="font-size:1.15rem; margin-bottom:16px;">+ Record New Service / Maintenance Entry</h3>
+        <form id="maintenance-form">
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="maint-type">Service Type</label>
+              <select id="maint-type" required>
+                <option value="routine_service">Routine Annual Service & Filter Change</option>
+                <option value="oil_change">Engine & Hydraulic Oil Change</option>
+                <option value="blade_sharpening">Rotavator / Harvester Blade Replacement</option>
+                <option value="tire_replacement">Tire Puncture / New Agricultural Lugged Tires</option>
+                <option value="engine_repair">Engine / Transmission Repair</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="maint-cost">Cost Incurred (₹)</label>
+              <input type="number" id="maint-cost" min="0" placeholder="e.g. 4500" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="maint-date">Service Date</label>
+              <input type="date" id="maint-date" required>
+            </div>
+            <div class="form-group">
+              <label for="maint-next-date">Recommended Next Service Date</label>
+              <input type="date" id="maint-next-date">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="maint-by">Mechanic / Workshop</label>
+              <input type="text" id="maint-by" placeholder="e.g. Authorized Mahindra Dealer, Local Workshop">
+            </div>
+            <div class="form-group">
+              <label for="maint-status">Machine Status After Service</label>
+              <select id="maint-status">
+                <option value="operational" selected>Operational (Ready for Rental & Exchange)</option>
+                <option value="under_maintenance">Under Maintenance (Blocks New Bookings)</option>
+                <option value="decommissioned">Decommissioned</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="maint-desc">Work Details & Part Numbers</label>
+            <textarea id="maint-desc" rows="2" placeholder="Describe parts replaced, oil grades used..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn btn-primary">Save Maintenance Entry</button>
+        </form>
+      </div>
+
+      <!-- Past Service History Table -->
+      <div class="card">
+        <div class="card-header">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0;">Service & Inspection Log</h3>
+        </div>
+        <div class="card-body" id="records-container">
+          <div class="empty-state"><p>Loading records...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const equipId = urlParams.get('id') || 'e1000000-0000-0000-0000-000000000001';
+
+    // Default today
+    document.getElementById('maint-date').value = new Date().toISOString().split('T')[0];
+
+    async function loadRecords() {
+      const container = document.getElementById('records-container');
+      try {
+        const res = await Api.get(`/equipment/${equipId}/maintenance`);
+        const records = res.data.records || [];
+
+        if (records.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <p>No prior maintenance logs recorded. Regular maintenance builds renter trust!</p>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Service Type</th>
+                  <th>Details</th>
+                  <th>Workshop</th>
+                  <th>Cost</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${records.map(r => `
+                  <tr>
+                    <td>${r.service_date}</td>
+                    <td><strong>${r.maintenance_type.replace('_', ' ')}</strong></td>
+                    <td>${r.description}</td>
+                    <td>${r.performed_by}</td>
+                    <td>₹${r.cost}</td>
+                    <td><span class="badge ${r.equipment_status_after === 'operational' ? 'badge-available' : 'badge-cancelled'}">${r.equipment_status_after}</span></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><p style="color:red;">${err.message}</p></div>`;
+      }
+    }
+
+    document.getElementById('maintenance-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await Api.post(`/equipment/${equipId}/maintenance`, {
+          maintenanceType: document.getElementById('maint-type').value,
+          cost: parseFloat(document.getElementById('maint-cost').value) || 0,
+          serviceDate: document.getElementById('maint-date').value,
+          nextServiceDate: document.getElementById('maint-next-date').value || undefined,
+          performedBy: document.getElementById('maint-by').value.trim() || undefined,
+          equipmentStatusAfter: document.getElementById('maint-status').value,
+          description: document.getElementById('maint-desc').value.trim()
+        });
+        Toast.success('Service log recorded and status updated!');
+        document.getElementById('maint-desc').value = '';
+        loadRecords();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    loadRecords();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Damage Reports & Inspections — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 860px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; Damage Reports
+      </p>
+      <h1>Damage Reports & Incident Tracking</h1>
+      <p style="color:var(--color-text-secondary); margin-bottom: var(--space-8);">
+        Documented machinery condition issues linked directly to booking transactions for fair resolution and deposit claim processing.
+      </p>
+
+      <div class="card">
+        <div class="card-header">
+          <h3 style="font-size: 1.15rem; margin-bottom: 0;">Reported Incidents</h3>
+        </div>
+        <div class="card-body" id="damage-list-container">
+          <div class="empty-state">
+            <div class="empty-state-icon">🛡️</div>
+            <h3>No Active Damage Reports</h3>
+            <p>All machinery returns have been inspected and confirmed in good order.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+  </script>
+</body>
+</html>
+

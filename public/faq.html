@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frequently Asked Questions — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16);">
+    <div class="container" style="max-width: 860px;">
+      <div style="text-align: center; margin-bottom: var(--space-12);">
+        <span class="badge badge-exchange" style="margin-bottom: 8px;">Help & Answers</span>
+        <h1>Frequently Asked Questions</h1>
+        <p style="font-size: var(--font-size-lg);">
+          Find quick answers regarding equipment rentals, idle-time swaps, payments, and disputes.
+        </p>
+      </div>
+
+      <div class="accordion" id="faq-list">
+        <!-- Q1 -->
+        <div class="accordion-item active">
+          <button class="accordion-header">
+            <span>Do I need separate accounts for renting and listing machinery?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>No. A single FarmSharw account allows you to be both a renter and an equipment owner. You can search and rent implements from other farmers while simultaneously listing your own machinery to earn rental income or participate in idle-time exchanges.</p>
+          </div>
+        </div>
+
+        <!-- Q2 -->
+        <div class="accordion-item">
+          <button class="accordion-header">
+            <span>How does the Idle-Time Equipment Exchange work?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>If you have machinery that is idle during certain months, you can propose an exchange with another farmer whose machine you need. Both parties negotiate dates and an optional cash difference adjustment. When both accept, FarmSharw atomically secures the booking schedules for both machines.</p>
+          </div>
+        </div>
+
+        <!-- Q3 -->
+        <div class="accordion-item">
+          <button class="accordion-header">
+            <span>How does FarmSharw prevent two farmers from booking the same machine?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>We do not rely on frontend checks. Our Supabase PostgreSQL database employs exclusion constraints using timestamp ranges and the `btree_gist` extension. Overlapping reservations are blocked at the transaction level, guaranteeing zero schedule collisions.</p>
+          </div>
+        </div>
+
+        <!-- Q4 -->
+        <div class="accordion-item">
+          <button class="accordion-header">
+            <span>What happens if equipment is damaged during a rental?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>Both participants complete an inspection upon handover and return. If damage occurs, either party can file a formal Damage Report with supporting photographs via their dashboard. Refundable security deposits can be held while the report is reviewed or resolved through our Dispute Management procedure.</p>
+          </div>
+        </div>
+
+        <!-- Q5 -->
+        <div class="accordion-item">
+          <button class="accordion-header">
+            <span>Can I pay in cash instead of online?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>Yes, provided the equipment owner enables the Cash on Pickup option for that machine. The renter pays upon physical handover, and the owner confirms receipt through an auditable status update in their dashboard.</p>
+          </div>
+        </div>
+
+        <!-- Q6 -->
+        <div class="accordion-item">
+          <button class="accordion-header">
+            <span>What regional Indian languages are supported?</span>
+            <span>▼</span>
+          </button>
+          <div class="accordion-body">
+            <p>FarmSharw supports English, Telugu (తెలుగు), Hindi (हिन्दी), Tamil (தமிழ்), Kannada (ಕನ್ನಡ), and Marathi (मराठी). You can switch your preferred language at any time from the navigation bar or within your profile settings.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    renderHeader();
+    renderFooter();
+
+    document.querySelectorAll('.accordion-header').forEach(header => {
+      header.addEventListener('click', () => {
+        header.parentElement.classList.toggle('active');
+      });
+    });
+  </script>
+</body>
+</html>
+

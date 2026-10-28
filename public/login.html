@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-12) 0 var(--space-16); display: flex; align-items: center; justify-content: center;">
+    <div class="container" style="max-width: 480px;">
+      <div class="card" style="padding: var(--space-8); box-shadow: var(--shadow-lg);">
+        <div style="text-align: center; margin-bottom: var(--space-6);">
+          <span style="font-size: 2.5rem;">🌾</span>
+          <h2 style="font-size: 1.5rem; margin-top: 8px; margin-bottom: 4px;">Welcome Back to FarmSharw</h2>
+          <p style="font-size: var(--font-size-sm); color: var(--color-text-secondary); margin-bottom: 0;">
+            Sign in to manage bookings, machinery listings, and idle-time exchanges.
+          </p>
+        </div>
+
+        <!-- Auth Tabs: Phone OTP vs Email -->
+        <div class="tabs-nav" style="justify-content: center; margin-bottom: var(--space-6);">
+          <button class="tab-btn active" data-tab="tab-phone">📱 Indian Phone OTP</button>
+          <button class="tab-btn" data-tab="tab-email">✉️ Email & Password</button>
+        </div>
+
+        <!-- Phone OTP Form -->
+        <div id="tab-phone" class="tab-pane active">
+          <form id="phone-login-form">
+            <div class="form-group">
+              <label for="phone-input">Mobile Number</label>
+              <div style="display:flex; gap:8px;">
+                <input type="text" value="+91" disabled style="width:64px; text-align:center; background:#eee;">
+                <input type="tel" id="phone-input" placeholder="9876543210" pattern="[6-9][0-9]{9}" required style="flex:1;">
+              </div>
+              <span class="form-hint">Enter your 10-digit Indian mobile number</span>
+            </div>
+
+            <div id="otp-input-group" class="form-group" style="display:none;">
+              <label for="otp-token">6-Digit OTP</label>
+              <input type="text" id="otp-token" placeholder="Enter 6-digit verification code" maxlength="6">
+              <span class="form-hint" style="color:var(--color-primary); font-weight:500;">
+                💡 For testing/demo mode, enter OTP: <strong>123456</strong>
+              </span>
+            </div>
+
+            <button type="submit" id="phone-submit-btn" class="btn btn-primary btn-block btn-lg" style="margin-top: 16px;">
+              Send Verification OTP
+            </button>
+          </form>
+        </div>
+
+        <!-- Email & Password Form -->
+        <div id="tab-email" class="tab-pane">
+          <form id="email-login-form">
+            <div class="form-group">
+              <label for="email-input">Email Address</label>
+              <input type="email" id="email-input" placeholder="farmer@example.com" required>
+            </div>
+
+            <div class="form-group">
+              <div style="display:flex; justify-content:space-between; align-items:center;">
+                <label for="password-input">Password</label>
+                <a href="/forgot-password.html" style="font-size:var(--font-size-xs);">Forgot?</a>
+              </div>
+              <input type="password" id="password-input" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 16px;">
+              Sign In
+            </button>
+          </form>
+        </div>
+
+        <!-- Demo One-Click Account Switcher (For local evaluation) -->
+        <div style="margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px dashed var(--color-border); text-align: center;">
+          <p style="font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted); font-weight: bold; margin-bottom: 8px;">
+            Quick Dev/Demo Switcher:
+          </p>
+          <div style="display:flex; gap:6px; justify-content:center; flex-wrap:wrap;">
+            <button class="btn btn-sm btn-outline demo-login-btn" data-user="a0000000-0000-0000-0000-000000000004">🚜 Renter (Suresh)</button>
+            <button class="btn btn-sm btn-outline demo-login-btn" data-user="a0000000-0000-0000-0000-000000000002">🌾 Owner (Gurpreet)</button>
+            <button class="btn btn-sm btn-outline demo-login-btn" data-user="a0000000-0000-0000-0000-000000000001">🛡️ Admin (Ramesh)</button>
+          </div>
+        </div>
+
+        <p style="text-align: center; font-size: var(--font-size-sm); margin-top: var(--space-6); margin-bottom: 0;">
+          New to FarmSharw? <a href="/register.html" style="font-weight: 600;">Register as Farmer</a>
+        </p>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Api } from '/assets/js/api.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const redirectUrl = urlParams.get('redirect') || '/dashboard.html';
+
+    // Tabs
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.getAttribute('data-tab')).classList.add('active');
+      });
+    });
+
+    // Phone OTP Flow
+    let otpSent = false;
+    let targetPhone = '';
+
+    document.getElementById('phone-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const phoneInput = document.getElementById('phone-input').value.trim();
+      targetPhone = phoneInput.startsWith('+91') ? phoneInput : `+91${phoneInput}`;
+
+      if (!otpSent) {
+        try {
+          const res = await Api.post('/auth/phone/otp', { phone: targetPhone });
+          Toast.success(res.data.message);
+          otpSent = true;
+          document.getElementById('otp-input-group').style.display = 'block';
+          document.getElementById('phone-input').disabled = true;
+          document.getElementById('phone-submit-btn').textContent = 'Verify OTP & Log In';
+        } catch (err) {
+          Toast.error(err.message);
+        }
+      } else {
+        const token = document.getElementById('otp-token').value.trim();
+        try {
+          const res = await Api.post('/auth/phone/verify', { phone: targetPhone, token });
+          const session = res.data.session;
+          Auth.setSession(session.access_token, session.user);
+          Toast.success('Login verified successfully!');
+          setTimeout(() => {
+            window.location.href = redirectUrl;
+          }, 800);
+        } catch (err) {
+          Toast.error(err.message);
+        }
+      }
+    });
+
+    // Email login fallback / demo mode
+    document.getElementById('email-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email-input').value.trim();
+      // Demo mock token fallback
+      Auth.setSession(`mock-token-${email}`, { email, profile: { full_name: email.split('@')[0] }, roles: ['renter'] });
+      Toast.success('Logged in successfully!');
+      setTimeout(() => {
+        window.location.href = redirectUrl;
+      }, 800);
+    });
+
+    // Demo Switcher buttons
+    document.querySelectorAll('.demo-login-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const userId = btn.getAttribute('data-user');
+        Auth.setSession(`mock-token-${userId}`, { id: userId });
+        Toast.success('Switched to test identity!');
+        setTimeout(() => {
+          window.location.href = redirectUrl;
+        }, 600);
+      });
+    });
+  </script>
+</body>
+</html>
+

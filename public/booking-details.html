@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Booking Details & Operational Timeline — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 980px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; <a href="/bookings.html">Bookings</a> &rsaquo; <span id="ref-crumb">Booking</span>
+      </p>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: 24px;">
+        <div>
+          <h1 id="booking-title" style="margin-bottom: 4px;">Booking Reference</h1>
+          <p id="booking-subtitle" style="margin-bottom: 0; color:var(--color-text-secondary);"></p>
+        </div>
+        <div style="display:flex; gap:12px; align-items:center;">
+          <span id="booking-status-badge" class="badge badge-pending" style="font-size:0.9rem; padding: 6px 12px;">Pending</span>
+        </div>
+      </div>
+
+      <!-- Action Banner -->
+      <div id="action-banner" class="card" style="padding: 16px; margin-bottom: 24px; background:#faf8f5; border:1px solid var(--color-border); display:none;">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h4 id="action-banner-title" style="margin-bottom:2px; font-size:1rem;">Required Action</h4>
+            <p id="action-banner-desc" style="font-size:0.85rem; margin-bottom:0;"></p>
+          </div>
+          <div id="action-buttons-container" style="display:flex; gap:8px;"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2" style="gap:24px; align-items:start;">
+        <!-- Left: Machinery & Operational Details -->
+        <div>
+          <!-- Machine & Participant Details -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <h3 style="font-size: 1.1rem; margin-bottom: 0;">Equipment & Handover Details</h3>
+            </div>
+            <div class="card-body">
+              <h4 id="equip-name" style="margin-bottom:4px;">Machinery</h4>
+              <p id="handover-type" style="font-size:0.85rem; color:#666; margin-bottom:12px;"></p>
+
+              <!-- Confidential Address Box -->
+              <div id="address-box" style="background:#e8f5e9; border:1px solid #c8e6c9; border-radius:var(--radius-md); padding:12px; margin-bottom:16px;">
+                <div style="font-size:0.75rem; font-weight:bold; color:#2e7d32; text-transform:uppercase;">Confirmed Handover Address</div>
+                <div id="exact-address-text" style="font-size:0.9rem; margin-top:4px;">Disclosed upon confirmation</div>
+              </div>
+
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:0.85rem;">
+                <div>
+                  <strong>Equipment Owner:</strong><br>
+                  <span id="owner-name">Owner</span><br>
+                  <span id="owner-phone" style="color:#666;">📞 Contact</span>
+                </div>
+                <div>
+                  <strong>Renter:</strong><br>
+                  <span id="renter-name">Renter</span><br>
+                  <span id="renter-phone" style="color:#666;">📞 Contact</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Status Timeline -->
+          <div class="card">
+            <div class="card-header">
+              <h3 style="font-size: 1.1rem; margin-bottom: 0;">Operational Status Timeline</h3>
+            </div>
+            <div class="card-body">
+              <div class="timeline" id="status-timeline">
+                <!-- Injected via JS -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Authoritative Financials & Payments -->
+        <div>
+          <!-- Price Items -->
+          <div class="card" style="margin-bottom: 24px;">
+            <div class="card-header">
+              <h3 style="font-size: 1.1rem; margin-bottom: 0;">Authoritative Financial Snapshot</h3>
+            </div>
+            <div class="card-body" style="padding:0;">
+              <table class="table" id="pricing-table">
+                <tbody>
+                  <!-- Line items injected via JS -->
+                </tbody>
+              </table>
+              <div style="padding: 16px; background:#faf8f5; border-top:1px solid var(--color-border-light); display:flex; justify-content:space-between; align-items:center;">
+                <span style="font-weight:bold; font-size:1.1rem;">Total Amount</span>
+                <span id="total-amount-display" style="font-size:1.4rem; font-weight:bold; color:var(--color-primary);">₹0.00</span>
+              </div>
+            </div>
+            <div class="card-footer" style="flex-direction:column; align-items:stretch; gap:8px;">
+              <div style="display:flex; justify-content:space-between; font-size:0.85rem;">
+                <span>Payment Mode: <strong id="payment-mode-display">Cash on Pickup</strong></span>
+                <span>Status: <strong id="payment-status-display">Pending</strong></span>
+              </div>
+              <div id="payment-action-box" style="margin-top:8px;"></div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="card" style="padding:16px;">
+            <h4 style="font-size:1rem; margin-bottom:12px;">Operational Controls</h4>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+              <button id="btn-record-cash" class="btn btn-outline btn-sm" style="display:none;">💵 Record Cash Collection</button>
+              <button id="btn-report-damage" class="btn btn-sm" style="background:#fdf2f1; border:1px solid #f5c2c0; color:#c62828;">⚠️ Report Equipment Damage</button>
+              <button id="btn-cancel-booking" class="btn btn-sm" style="background:#f4efe6;">Cancel Reservation</button>
+              <button id="btn-leave-review" class="btn btn-secondary btn-sm" style="display:none;">★ Leave Review</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal: Record Cash Payment -->
+  <div class="modal-backdrop" id="modal-cash-record">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Record Cash Collection</h3>
+        <button class="modal-close-btn" data-dismiss="modal">&times;</button>
+      </div>
+      <form id="cash-record-form">
+        <div class="modal-body">
+          <p style="font-size:0.9rem;">
+            Record the physical cash received from the renter during equipment handover. This updates the booking payment status and creates an auditable record.
+          </p>
+          <div class="form-group">
+            <label for="cash-amount-input">Amount Collected (₹) *</label>
+            <input type="number" id="cash-amount-input" required>
+          </div>
+          <div class="form-group">
+            <label for="cash-notes-input">Handover Notes</label>
+            <input type="text" id="cash-notes-input" placeholder="e.g. Received in full at farm site">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Confirm Cash Received</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Report Damage -->
+  <div class="modal-backdrop" id="modal-damage-report">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Submit Damage Report</h3>
+        <button class="modal-close-btn" data-dismiss="modal">&times;</button>
+      </div>
+      <form id="damage-report-form">
+        <div class="modal-body">
+          <p style="font-size:0.85rem; color:#666;">
+            Log any mechanical fault, body damage, or component failure observed during the rental period.
+          </p>
+          <div class="form-group">
+            <label for="damage-severity">Severity</label>
+            <select id="damage-severity">
+              <option value="minor">Minor (Scratches, minor wear, small hose replacement)</option>
+              <option value="moderate">Moderate (Blade damage, tire puncture, electrical issue)</option>
+              <option value="severe">Severe (Engine failure, hydraulic breakdown, major structural bend)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="damage-desc">Detailed Description *</label>
+            <textarea id="damage-desc" rows="3" placeholder="Describe the damage, when it happened, and photos available..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="damage-cost">Estimated Repair Cost (₹)</label>
+            <input type="number" id="damage-cost" min="0" placeholder="0">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">File Damage Report</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Leave Review -->
+  <div class="modal-backdrop" id="modal-review">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <h3>Rate Equipment & Experience</h3>
+        <button class="modal-close-btn" data-dismiss="modal">&times;</button>
+      </div>
+      <form id="review-form">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="review-rating">Rating (1 to 5 Stars)</label>
+            <select id="review-rating" required>
+              <option value="5" selected>★★★★★ - 5 Stars (Excellent Condition & Handover)</option>
+              <option value="4">★★★★☆ - 4 Stars (Good Machine, Smooth Operation)</option>
+              <option value="3">★★★☆☆ - 3 Stars (Average, Minor Issues)</option>
+              <option value="2">★★☆☆☆ - 2 Stars (Poor Condition / Delays)</option>
+              <option value="1">★☆☆☆☆ - 1 Star (Unsatisfactory / Broken)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="review-comment">Review Comments *</label>
+            <textarea id="review-comment" rows="3" placeholder="How did the tractor/harvester perform in the field? Would you recommend this owner?" required></textarea>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary">Submit Review</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+    import { Modal } from '/assets/js/components/modal.js';
+
+    renderHeader();
+    renderFooter();
+    Modal.setupDismissListeners();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const user = Auth.getUser();
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('id');
+
+    if (!bookingId) {
+      window.location.href = '/bookings.html';
+    }
+
+    let bookingData = null;
+
+    async function loadBooking() {
+      try {
+        const res = await Api.get(`/bookings/${bookingId}`);
+        const b = res.data.booking;
+        bookingData = b;
+
+        document.getElementById('ref-crumb').textContent = b.booking_reference;
+        document.getElementById('booking-title').textContent = `Booking #${b.booking_reference}`;
+        document.getElementById('booking-subtitle').textContent = `Reserved on ${new Date(b.created_at).toLocaleDateString('en-IN')}`;
+
+        // Status badge
+        const badge = document.getElementById('booking-status-badge');
+        badge.className = `badge badge-${b.status}`;
+        badge.textContent = b.status.replace('_', ' ').toUpperCase();
+
+        // Equipment & handover
+        document.getElementById('equip-name').innerHTML = `<a href="/equipment-details.html?id=${b.equipment_id}">${b.equipment?.title || 'Machinery'}</a>`;
+        document.getElementById('handover-type').textContent = `Method: ${b.handover_method === 'owner_delivery' ? 'Field Delivery (' + b.delivery_distance_km + ' km)' : 'Farm Pickup'}`;
+
+        if (b.exact_pickup_address) {
+          document.getElementById('exact-address-text').textContent = b.exact_pickup_address;
+        } else {
+          document.getElementById('exact-address-text').textContent = 'Exact street address unlocked when booking is confirmed by owner.';
+        }
+
+        // Participants
+        document.getElementById('owner-name').textContent = b.owner?.full_name || 'Owner';
+        document.getElementById('owner-phone').textContent = b.owner?.phone ? `📞 ${b.owner.phone}` : '';
+        document.getElementById('renter-name').textContent = b.renter?.full_name || 'Renter';
+        document.getElementById('renter-phone').textContent = b.renter?.phone ? `📞 ${b.renter.phone}` : '';
+
+        // Price items
+        const pricingBody = document.querySelector('#pricing-table tbody');
+        pricingBody.innerHTML = b.priceItems.map(item => `
+          <tr>
+            <td style="font-size:0.85rem;">${item.description}</td>
+            <td style="text-align:right; font-weight:600; font-size:0.85rem;">₹${item.amount.toFixed(2)}</td>
+          </tr>
+        `).join('');
+
+        document.getElementById('total-amount-display').textContent = `₹${b.total_amount.toFixed(2)}`;
+        document.getElementById('payment-mode-display').textContent = b.payment_method.replace('_', ' ');
+        document.getElementById('payment-status-display').textContent = b.payment_status.toUpperCase();
+
+        // Timeline
+        const timeline = document.getElementById('status-timeline');
+        timeline.innerHTML = b.statusHistory.map(sh => `
+          <div class="timeline-item">
+            <div class="timeline-marker done"></div>
+            <div class="timeline-title">${sh.to_status.replace('_', ' ').toUpperCase()}</div>
+            <div class="timeline-time">${new Date(sh.created_at).toLocaleString('en-IN')}</div>
+            <p style="font-size:0.85rem; margin-bottom:0; color:#555;">${sh.notes || 'Status updated'}</p>
+          </div>
+        `).join('');
+
+        // Action Banner
+        setupActionBanner(b);
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    }
+
+    function setupActionBanner(b) {
+      const banner = document.getElementById('action-banner');
+      const title = document.getElementById('action-banner-title');
+      const desc = document.getElementById('action-banner-desc');
+      const buttons = document.getElementById('action-buttons-container');
+      const isOwner = user.id === b.owner_id;
+      const isRenter = user.id === b.renter_id;
+
+      banner.style.display = 'none';
+      buttons.innerHTML = '';
+
+      // Owner pending request
+      if (b.status === 'pending_owner' && isOwner) {
+        banner.style.display = 'block';
+        title.textContent = 'Booking Request Awaiting Your Approval';
+        desc.textContent = `${b.renter?.full_name} has requested this machinery. Review dates and confirm or decline.`;
+        buttons.innerHTML = `
+          <button id="btn-banner-approve" class="btn btn-primary btn-sm">Approve Booking</button>
+          <button id="btn-banner-reject" class="btn btn-danger btn-sm">Decline</button>
+        `;
+        document.getElementById('btn-banner-approve').onclick = async () => {
+          await Api.post(`/bookings/${b.id}/approve`);
+          Toast.success('Booking approved!');
+          loadBooking();
+        };
+        document.getElementById('btn-banner-reject').onclick = async () => {
+          const reason = prompt('Reason for declining:');
+          if (reason !== null) {
+            await Api.post(`/bookings/${b.id}/reject`, { reason });
+            Toast.warning('Booking declined');
+            loadBooking();
+          }
+        };
+      }
+
+      // Check-in (Confirmed -> Active)
+      if (b.status === 'confirmed' && isOwner) {
+        banner.style.display = 'block';
+        title.textContent = 'Ready for Handover';
+        desc.textContent = 'When equipment is physically handed over to the renter, click below to record check-in.';
+        buttons.innerHTML = `<button id="btn-banner-checkin" class="btn btn-primary btn-sm">Confirm Handover / Check-In</button>`;
+        document.getElementById('btn-banner-checkin').onclick = async () => {
+          await Api.post(`/bookings/${b.id}/check-in`, { notes: 'Handed over at farm site' });
+          Toast.success('Equipment is now active in the field!');
+          loadBooking();
+        };
+      }
+
+      // Return (Active -> Completed)
+      if (b.status === 'active' && isOwner) {
+        banner.style.display = 'block';
+        title.textContent = 'Equipment Return Inspection';
+        desc.textContent = 'When the renter returns the equipment, inspect condition and mark completed.';
+        buttons.innerHTML = `<button id="btn-banner-return" class="btn btn-primary btn-sm">Confirm Return & Complete</button>`;
+        document.getElementById('btn-banner-return').onclick = async () => {
+          await Api.post(`/bookings/${b.id}/return`, { notes: 'Returned in satisfactory condition' });
+          Toast.success('Rental marked completed!');
+          loadBooking();
+        };
+      }
+
+      // Cash collection button for owner
+      if (isOwner && b.payment_method === 'cash_on_pickup' && b.payment_status === 'pending') {
+        document.getElementById('btn-record-cash').style.display = 'block';
+        document.getElementById('cash-amount-input').value = b.total_amount;
+        document.getElementById('btn-record-cash').onclick = () => {
+          Modal.open('modal-cash-record');
+        };
+      } else {
+        document.getElementById('btn-record-cash').style.display = 'none';
+      }
+
+      // Review button for completed
+      if (b.status === 'completed') {
+        document.getElementById('btn-leave-review').style.display = 'block';
+        document.getElementById('btn-leave-review').onclick = () => {
+          Modal.open('modal-review');
+        };
+      }
+    }
+
+    // Cash Recording form submission
+    document.getElementById('cash-record-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        const amount = document.getElementById('cash-amount-input').value;
+        const notes = document.getElementById('cash-notes-input').value;
+        await Api.post(`/bookings/${bookingId}/cash-payment-record`, {
+          amountCollected: parseFloat(amount),
+          notes
+        });
+        Toast.success('Cash collection recorded successfully!');
+        Modal.close('modal-cash-record');
+        loadBooking();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    // Report damage trigger
+    document.getElementById('btn-report-damage').onclick = () => {
+      Modal.open('modal-damage-report');
+    };
+
+    document.getElementById('damage-report-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await Api.post(`/bookings/${bookingId}/damage-reports`, {
+          severity: document.getElementById('damage-severity').value,
+          description: document.getElementById('damage-desc').value.trim(),
+          estimatedCost: parseFloat(document.getElementById('damage-cost').value) || 0
+        });
+        Toast.warning('Damage report filed and logged for review.');
+        Modal.close('modal-damage-report');
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    // Review submission
+    document.getElementById('review-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      try {
+        await Api.post(`/bookings/${bookingId}/reviews`, {
+          rating: parseInt(document.getElementById('review-rating').value),
+          comment: document.getElementById('review-comment').value.trim()
+        });
+        Toast.success('Review submitted successfully! Thank you for strengthening the farmer community.');
+        Modal.close('modal-review');
+        document.getElementById('btn-leave-review').style.display = 'none';
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+
+    // Cancellation trigger
+    document.getElementById('btn-cancel-booking').onclick = async () => {
+      const reason = prompt('Reason for cancelling this booking:');
+      if (reason === null) return;
+      try {
+        await Api.post(`/bookings/${bookingId}/cancel`, { reason });
+        Toast.warning('Booking cancelled.');
+        loadBooking();
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    };
+
+    loadBooking();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom: var(--space-6);">
+        <div>
+          <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+            <a href="/dashboard.html">Dashboard</a> &rsaquo; Bookings
+          </p>
+          <h1 style="margin-bottom: 0;">Equipment Bookings Management</h1>
+        </div>
+        <a href="/equipment.html" class="btn btn-primary">+ Rent More Machinery</a>
+      </div>
+
+      <!-- Filter Controls -->
+      <div style="background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-4); margin-bottom: var(--space-6); display: flex; gap: 16px; flex-wrap: wrap;">
+        <div style="flex:1; min-width: 180px;">
+          <label for="filter-role" style="font-size:var(--font-size-xs);">My Capacity</label>
+          <select id="filter-role">
+            <option value="">All Bookings (Renter & Owner)</option>
+            <option value="renter">As Renter (My hires)</option>
+            <option value="owner">As Owner (My machines hired out)</option>
+          </select>
+        </div>
+
+        <div style="flex:1; min-width: 180px;">
+          <label for="filter-status" style="font-size:var(--font-size-xs);">Status</label>
+          <select id="filter-status">
+            <option value="">All Statuses</option>
+            <option value="pending_owner">Pending Owner Approval</option>
+            <option value="awaiting_payment">Awaiting Payment</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="active">Active (In Field)</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bookings List Table -->
+      <div class="card">
+        <div class="card-body" id="bookings-list-container">
+          <div class="empty-state"><p>Loading bookings...</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    const roleSelect = document.getElementById('filter-role');
+    const statusSelect = document.getElementById('filter-status');
+
+    async function loadBookings() {
+      const container = document.getElementById('bookings-list-container');
+      try {
+        const params = {
+          role: roleSelect.value || undefined,
+          status: statusSelect.value || undefined
+        };
+        const res = await Api.get('/bookings', params);
+        const bookings = res.data.bookings || [];
+
+        if (bookings.length === 0) {
+          container.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-state-icon">🚜</div>
+              <h3>No Bookings Found</h3>
+              <p>No reservations matched the selected filters.</p>
+              <a href="/equipment.html" class="btn btn-outline">Explore Marketplace</a>
+            </div>
+          `;
+          return;
+        }
+
+        container.innerHTML = `
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Booking Reference</th>
+                  <th>Equipment Title</th>
+                  <th>Dates & Duration</th>
+                  <th>Amount</th>
+                  <th>Payment</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${bookings.map(b => `
+                  <tr>
+                    <td><strong>${b.booking_reference}</strong></td>
+                    <td>
+                      <a href="/equipment-details.html?id=${b.equipment_id}">${b.equipment?.title || 'Equipment'}</a><br>
+                      <small style="color:#666;">📍 ${b.equipment?.district || 'District'}</small>
+                    </td>
+                    <td>
+                      ${new Date(b.start_time).toLocaleDateString('en-IN')} &rarr; ${new Date(b.end_time).toLocaleDateString('en-IN')}<br>
+                      <small style="color:#666;">${b.rental_duration_hours} hours</small>
+                    </td>
+                    <td><strong>₹${b.total_amount}</strong></td>
+                    <td>
+                      <span class="badge ${b.payment_status === 'captured' ? 'badge-available' : 'badge-pending'}">
+                        ${b.payment_method.replace('_', ' ')} (${b.payment_status})
+                      </span>
+                    </td>
+                    <td>
+                      <span class="badge badge-${b.status}">${b.status.replace('_', ' ')}</span>
+                    </td>
+                    <td>
+                      <a href="/booking-details.html?id=${b.id}" class="btn btn-primary btn-sm">View Timeline</a>
+                    </td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+          </div>
+        `;
+      } catch (err) {
+        container.innerHTML = `<div class="empty-state"><p style="color:var(--color-status-cancelled);">${err.message}</p></div>`;
+      }
+    }
+
+    roleSelect.addEventListener('change', loadBookings);
+    statusSelect.addEventListener('change', loadBookings);
+
+    loadBookings();
+  </script>
+</body>
+</html>
+

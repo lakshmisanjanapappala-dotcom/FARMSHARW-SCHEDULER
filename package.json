@@ -1,0 +1,35 @@
+{
+  "name": "farmsharw-scheduler",
+  "version": "1.0.0",
+  "description": "FarmSharw Scheduler — Agricultural Equipment Rental & Idle-Time Exchange",
+  "main": "server/src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server/src/server.js",
+    "dev": "node --watch server/src/server.js",
+    "test": "node --test tests/**/*.test.js",
+    "seed": "node server/src/scripts/seed.js"
+  },
+  "keywords": [
+    "agriculture",
+    "equipment-rental",
+    "idle-time-exchange",
+    "farming",
+    "india",
+    "supabase"
+  ],
+  "author": "FarmSharw Team",
+  "license": "MIT",
+  "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
+    "cors": "^2.8.6",
+    "dotenv": "^18.0.9",
+    "express": "^5.3.0",
+    "express-rate-limit": "^8.7.1",
+    "helmet": "^8.3.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "supertest": "^7.3.1"
+  }
+}

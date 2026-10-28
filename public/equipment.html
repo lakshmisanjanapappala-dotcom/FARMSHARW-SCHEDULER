@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browse Equipment Marketplace — FarmSharw Scheduler</title>
+  <meta name="description" content="Discover agricultural machinery for rent or exchange across Indian districts and PIN codes.">
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container">
+      <!-- Breadcrumb & Title -->
+      <div style="margin-bottom: var(--space-6);">
+        <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+          <a href="/">Home</a> &rsaquo; Equipment Marketplace
+        </p>
+        <h1>Agricultural Equipment Marketplace</h1>
+        <p>Discover verified machinery available for paid rental or idle-time exchange nearby.</p>
+      </div>
+
+      <!-- Filters & Results Layout -->
+      <div style="display: grid; grid-template-columns: 280px 1fr; gap: var(--space-8); align-items: start;">
+        <!-- Left Filter Sidebar -->
+        <aside class="card" style="padding: var(--space-5);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: var(--space-4); border-bottom: 1px solid var(--color-border-light); padding-bottom: var(--space-3);">
+            <h3 style="font-size: 1.1rem; margin-bottom: 0;">Filters</h3>
+            <button id="clear-filters-btn" class="btn btn-sm" style="background:none; border:none; color:var(--color-primary); padding:0; text-decoration:underline; cursor:pointer;">Clear All</button>
+          </div>
+
+          <form id="filter-form">
+            <!-- Keyword -->
+            <div class="form-group">
+              <label for="filter-q">Keyword Search</label>
+              <input type="text" id="filter-q" name="q" placeholder="Model, manufacturer...">
+            </div>
+
+            <!-- Category -->
+            <div class="form-group">
+              <label for="filter-category">Category</label>
+              <select id="filter-category" name="category">
+                <option value="">All Categories</option>
+                <option value="tractors">Tractors</option>
+                <option value="rotavators">Rotavators</option>
+                <option value="harvesters">Combine Harvesters</option>
+                <option value="cultivators">Cultivators</option>
+                <option value="seed-drills">Seed Drills</option>
+                <option value="irrigation-pumps">Irrigation Pumps</option>
+                <option value="sprayers">Sprayers</option>
+                <option value="power-tillers">Power Tillers</option>
+                <option value="trailers">Trailers</option>
+              </select>
+            </div>
+
+            <!-- Location -->
+            <div class="form-group">
+              <label for="filter-pincode">PIN Code / District</label>
+              <input type="text" id="filter-pincode" name="pinCode" placeholder="6-digit PIN">
+            </div>
+
+            <!-- Condition -->
+            <div class="form-group">
+              <label for="filter-condition">Condition</label>
+              <select id="filter-condition" name="condition">
+                <option value="">Any Condition</option>
+                <option value="excellent">Excellent</option>
+                <option value="good">Good</option>
+                <option value="fair">Fair</option>
+              </select>
+            </div>
+
+            <!-- Checkbox toggles -->
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:normal;">
+                <input type="checkbox" id="filter-exchange" name="exchange" value="true">
+                <span>🔄 Exchange Eligible Only</span>
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-weight:normal;">
+                <input type="checkbox" id="filter-delivery" name="delivery" value="true">
+                <span>🚚 Delivery Offered</span>
+              </label>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-block">Apply Filters</button>
+          </form>
+        </aside>
+
+        <!-- Main Marketplace Results -->
+        <div>
+          <!-- Top Sort & View Bar -->
+          <div style="background-color: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: var(--space-3) var(--space-4); margin-bottom: var(--space-6); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: var(--space-3);">
+            <div id="results-count" style="font-size: var(--font-size-sm); color: var(--color-text-secondary); font-weight: 500;">
+              Showing listings...
+            </div>
+
+            <div style="display: flex; align-items: center; gap: var(--space-3);">
+              <label for="sort-select" style="margin-bottom:0; font-size:var(--font-size-xs);">Sort By:</label>
+              <select id="sort-select" style="width: auto; padding: 4px 8px; font-size: var(--font-size-sm);">
+                <option value="newest">Newest First</option>
+                <option value="price_asc">Price: Low to High</option>
+                <option value="price_desc">Price: High to Low</option>
+                <option value="distance">Distance Nearby</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Equipment Grid -->
+          <div class="grid grid-cols-3" id="equipment-grid">
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <p>Loading machinery listings...</p>
+            </div>
+          </div>
+
+          <!-- Pagination -->
+          <div id="pagination-controls" style="margin-top: var(--space-8); display: flex; justify-content: center; gap: var(--space-2);"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Api } from '/assets/js/api.js';
+
+    renderHeader();
+    renderFooter();
+
+    // Parse URL Query parameters
+    const urlParams = new URLSearchParams(window.location.search);
+    const filterForm = document.getElementById('filter-form');
+    const sortSelect = document.getElementById('sort-select');
+
+    // Populate form from URL
+    if (urlParams.get('q')) document.getElementById('filter-q').value = urlParams.get('q');
+    if (urlParams.get('category')) document.getElementById('filter-category').value = urlParams.get('category');
+    if (urlParams.get('pinCode')) document.getElementById('filter-pincode').value = urlParams.get('pinCode');
+    if (urlParams.get('condition')) document.getElementById('filter-condition').value = urlParams.get('condition');
+    if (urlParams.get('exchange') === 'true') document.getElementById('filter-exchange').checked = true;
+    if (urlParams.get('delivery') === 'true') document.getElementById('filter-delivery').checked = true;
+    if (urlParams.get('sort')) sortSelect.value = urlParams.get('sort');
+
+    async function fetchListings(page = 1) {
+      const grid = document.getElementById('equipment-grid');
+      const countEl = document.getElementById('results-count');
+      const paginationEl = document.getElementById('pagination-controls');
+
+      const params = {
+        q: document.getElementById('filter-q').value || undefined,
+        category: document.getElementById('filter-category').value || undefined,
+        pinCode: document.getElementById('filter-pincode').value || undefined,
+        condition: document.getElementById('filter-condition').value || undefined,
+        exchange: document.getElementById('filter-exchange').checked ? 'true' : undefined,
+        delivery: document.getElementById('filter-delivery').checked ? 'true' : undefined,
+        sort: sortSelect.value,
+        page,
+        limit: 9
+      };
+
+      grid.innerHTML = '<div class="empty-state" style="grid-column: 1 / -1;"><p>Fetching equipment...</p></div>';
+
+      try {
+        const res = await Api.get('/equipment', params);
+        const { items, pagination } = res.data;
+
+        countEl.textContent = `Found ${pagination.total} machine${pagination.total === 1 ? '' : 's'} available`;
+
+        if (items.length === 0) {
+          grid.innerHTML = `
+            <div class="empty-state" style="grid-column: 1 / -1;">
+              <div class="empty-state-icon">🚜</div>
+              <h3>No Matching Equipment Found</h3>
+              <p>Try clearing filters or searching for nearby PIN codes or districts.</p>
+              <button id="reset-search-btn" class="btn btn-outline">Clear Filters</button>
+            </div>
+          `;
+          document.getElementById('reset-search-btn')?.addEventListener('click', () => {
+            filterForm.reset();
+            fetchListings(1);
+          });
+          paginationEl.innerHTML = '';
+          return;
+        }
+
+        grid.innerHTML = items.map(item => `
+          <div class="card equipment-card card-hover">
+            <div class="equipment-card-media">
+              <img src="${item.images[0]?.image_url || '/assets/images/tractor.svg'}" alt="${item.title}" loading="lazy">
+              <span class="badge badge-available equipment-card-badge-top">${item.equipment_type}</span>
+              ${item.is_exchange_eligible ? '<span class="badge badge-exchange equipment-card-exchange-tag">🔄 Exchange</span>' : ''}
+            </div>
+            <div class="card-body">
+              <div class="equipment-card-meta">
+                <span>📍 ${item.village_or_town}, ${item.district} (${item.pin_code})</span>
+              </div>
+              <h3 class="equipment-card-title">
+                <a href="/equipment-details.html?id=${item.id}">${item.title}</a>
+              </h3>
+              <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 12px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                ${item.description}
+              </p>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-top: auto;">
+                <div class="equipment-card-price">
+                  ₹${item.pricing?.daily_rate || '---'}<small>/day</small>
+                </div>
+                <span class="badge" style="background:#f4efe6; color:#495057;">${item.condition}</span>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span style="font-size:0.8rem; color:var(--color-text-muted);">Owner: ${item.owner_name}</span>
+              <a href="/equipment-details.html?id=${item.id}" class="btn btn-primary btn-sm">View & Rent</a>
+            </div>
+          </div>
+        `).join('');
+
+        // Render Pagination
+        if (pagination.totalPages > 1) {
+          paginationEl.innerHTML = Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(p => `
+            <button class="btn btn-sm ${p === pagination.page ? 'btn-primary' : 'btn-outline'}" data-page="${p}">${p}</button>
+          `).join('');
+
+          paginationEl.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('click', () => {
+              fetchListings(parseInt(btn.getAttribute('data-page')));
+            });
+          });
+        } else {
+          paginationEl.innerHTML = '';
+        }
+      } catch (err) {
+        grid.innerHTML = `<div class="empty-state" style="grid-column: 1 / -1;"><p style="color:var(--color-status-cancelled);">${err.message}</p></div>`;
+      }
+    }
+
+    filterForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      fetchListings(1);
+    });
+
+    sortSelect.addEventListener('change', () => fetchListings(1));
+
+    document.getElementById('clear-filters-btn').addEventListener('click', () => {
+      filterForm.reset();
+      fetchListings(1);
+    });
+
+    fetchListings(1);
+  </script>
+</body>
+</html>
+

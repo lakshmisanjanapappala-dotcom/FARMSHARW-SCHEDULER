@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Access Forbidden (403) — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-16) 0; display: flex; align-items: center; justify-content: center;">
+    <div class="container" style="max-width: 560px; text-align: center;">
+      <span style="font-size: 4rem;">🛡️</span>
+      <h1 style="font-size: 2.25rem; margin-top: 16px;">Access Forbidden (403)</h1>
+      <p style="font-size: var(--font-size-lg); color: var(--color-text-secondary); margin-bottom: 24px;">
+        You do not possess the required authorization permissions to access this administrative or protected resource.
+      </p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <a href="/dashboard.html" class="btn btn-primary">Go to Dashboard</a>
+        <a href="/login.html" class="btn btn-outline">Switch Account</a>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    renderHeader();
+    renderFooter();
+  </script>
+</body>
+</html>
+

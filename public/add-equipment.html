@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>List Agricultural Equipment — FarmSharw Scheduler</title>
+  <link rel="stylesheet" href="/assets/css/variables.css">
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/components.css">
+  <link rel="stylesheet" href="/assets/css/layout.css">
+  <link rel="stylesheet" href="/assets/css/pages.css">
+</head>
+<body>
+  <header id="site-header"></header>
+
+  <main style="padding: var(--space-8) 0 var(--space-16);">
+    <div class="container" style="max-width: 820px;">
+      <p style="font-size: var(--font-size-xs); color: var(--color-text-muted); margin-bottom: 4px;">
+        <a href="/dashboard.html">Dashboard</a> &rsaquo; List Machinery
+      </p>
+      <h1>List Your Agricultural Equipment</h1>
+      <p style="margin-bottom: var(--space-8);">
+        Monetize your idle tractor, rotavator, or harvester. Define your pricing rules, availability, and exchange eligibility.
+      </p>
+
+      <div class="card" style="padding: var(--space-8);">
+        <form id="add-equipment-form">
+          <!-- Basic Info -->
+          <h3 style="font-size: 1.25rem; margin-bottom: 16px; border-bottom: 1px solid var(--color-border-light); padding-bottom: 8px;">
+            1. Equipment Overview
+          </h3>
+
+          <div class="form-group">
+            <label for="eq-title">Listing Title *</label>
+            <input type="text" id="eq-title" placeholder="e.g. Mahindra 575 DI Sarpanch 45 HP Tractor" required>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="eq-category">Category *</label>
+              <select id="eq-category" required>
+                <!-- Populated via JS -->
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eq-type">Equipment Sub-Type *</label>
+              <input type="text" id="eq-type" placeholder="e.g. 4WD Utility Tractor, Rotary Tiller" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-3">
+            <div class="form-group">
+              <label for="eq-mfr">Manufacturer</label>
+              <input type="text" id="eq-mfr" placeholder="e.g. Mahindra, Shaktiman, John Deere">
+            </div>
+            <div class="form-group">
+              <label for="eq-model">Model</label>
+              <input type="text" id="eq-model" placeholder="e.g. 575 DI, SRL 205">
+            </div>
+            <div class="form-group">
+              <label for="eq-year">Manufacture Year</label>
+              <input type="number" id="eq-year" min="1980" max="2027" placeholder="2022">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="eq-hp">Horsepower (HP)</label>
+              <input type="number" id="eq-hp" placeholder="e.g. 45">
+            </div>
+            <div class="form-group">
+              <label for="eq-condition">Machine Condition *</label>
+              <select id="eq-condition" required>
+                <option value="excellent">Excellent (Like New / Well Maintained)</option>
+                <option value="good" selected>Good (Reliable Regular Use)</option>
+                <option value="fair">Fair (Operational, Functional Wear)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="eq-desc">Description & Field Capabilities *</label>
+            <textarea id="eq-desc" rows="4" placeholder="Detail attachments included, hydraulics, maintenance history, fuel capacity, soil types recommended for..." required></textarea>
+          </div>
+
+          <!-- Location & Privacy -->
+          <h3 style="font-size: 1.25rem; margin: 32px 0 16px; border-bottom: 1px solid var(--color-border-light); padding-bottom: 8px;">
+            2. Location & Farmer Privacy Safeguards
+          </h3>
+          <p style="font-size: 0.85rem; color: var(--color-text-secondary); margin-bottom: 16px;">
+            🔒 <em>Note:</em> Your exact street address is kept completely private from public search. Only authorized renters with mutually confirmed bookings can see pickup directions.
+          </p>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="eq-state">State *</label>
+              <select id="eq-state" required>
+                <option value="">Select State</option>
+                <option value="Punjab">Punjab</option>
+                <option value="Haryana">Haryana</option>
+                <option value="Telangana">Telangana</option>
+                <option value="Andhra Pradesh">Andhra Pradesh</option>
+                <option value="Maharashtra">Maharashtra</option>
+                <option value="Karnataka">Karnataka</option>
+                <option value="Tamil Nadu">Tamil Nadu</option>
+                <option value="Gujarat">Gujarat</option>
+                <option value="Uttar Pradesh">Uttar Pradesh</option>
+                <option value="Madhya Pradesh">Madhya Pradesh</option>
+                <option value="Rajasthan">Rajasthan</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eq-district">District *</label>
+              <input type="text" id="eq-district" placeholder="e.g. Bathinda" required>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="eq-village">Village / Town *</label>
+              <input type="text" id="eq-village" placeholder="e.g. Raman Mandi" required>
+            </div>
+            <div class="form-group">
+              <label for="eq-pincode">6-Digit PIN Code *</label>
+              <input type="text" id="eq-pincode" pattern="\d{6}" placeholder="e.g. 151301" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="eq-address">Exact Farm Handover Address (Confidential) *</label>
+            <input type="text" id="eq-address" placeholder="Khasra/Survey number, link road landmark..." required>
+          </div>
+
+          <!-- Authoritative Pricing -->
+          <h3 style="font-size: 1.25rem; margin: 32px 0 16px; border-bottom: 1px solid var(--color-border-light); padding-bottom: 8px;">
+            3. Rental Rates (INR ₹)
+          </h3>
+
+          <div class="grid grid-cols-4">
+            <div class="form-group">
+              <label for="eq-daily">Daily Rate (₹) *</label>
+              <input type="number" id="eq-daily" min="100" placeholder="3500" required>
+            </div>
+            <div class="form-group">
+              <label for="eq-hourly">Hourly Rate (₹)</label>
+              <input type="number" id="eq-hourly" min="50" placeholder="500">
+            </div>
+            <div class="form-group">
+              <label for="eq-weekly">Weekly Rate (₹)</label>
+              <input type="number" id="eq-weekly" min="500" placeholder="20000">
+            </div>
+            <div class="form-group">
+              <label for="eq-seasonal">Seasonal Rate (₹)</label>
+              <input type="number" id="eq-seasonal" min="1000" placeholder="70000">
+            </div>
+          </div>
+
+          <!-- Handover & Deposit -->
+          <h3 style="font-size: 1.25rem; margin: 32px 0 16px; border-bottom: 1px solid var(--color-border-light); padding-bottom: 8px;">
+            4. Handover Logistics & Approval Policies
+          </h3>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label for="eq-approval">Booking Approval Policy</label>
+              <select id="eq-approval">
+                <option value="manual" selected>Manual Review (I review each request before confirming)</option>
+                <option value="instant">Instant Booking (Auto-confirm if calendar is free)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="eq-min-hours">Minimum Rental Hours</label>
+              <input type="number" id="eq-min-hours" value="4" min="1" max="24">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2">
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="eq-deposit-req">
+                <span>Require Refundable Security Deposit</span>
+              </label>
+              <input type="number" id="eq-deposit-amt" placeholder="Deposit Amount (₹)" style="margin-top:8px; display:none;">
+            </div>
+
+            <div class="form-group">
+              <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+                <input type="checkbox" id="eq-delivery-req">
+                <span>I Offer Field Delivery</span>
+              </label>
+              <div id="delivery-settings" style="display:none; margin-top:8px;">
+                <div style="display:flex; gap:8px;">
+                  <input type="number" id="eq-delivery-fee" placeholder="₹/km fee" style="flex:1;">
+                  <input type="number" id="eq-delivery-radius" placeholder="Max Radius (km)" style="flex:1;">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Idle-Time Exchange -->
+          <h3 style="font-size: 1.25rem; margin: 32px 0 16px; border-bottom: 1px solid var(--color-border-light); padding-bottom: 8px;">
+            5. Idle-Time Equipment Exchange
+          </h3>
+
+          <div class="form-group">
+            <label style="display:flex; align-items:center; gap:8px; cursor:pointer;">
+              <input type="checkbox" id="eq-exchange-eligible" checked>
+              <strong>Enable Idle-Time Equipment Exchange for this machine</strong>
+            </label>
+            <span class="form-hint">Allows other verified farmers to propose trading access to their complementary equipment.</span>
+          </div>
+
+          <div class="form-group" id="exchange-pref-group">
+            <label for="eq-exchange-pref">Exchange Preferences (What machinery do you need in return?)</label>
+            <input type="text" id="eq-exchange-pref" placeholder="e.g. Seeking Laser Land Leveller or Multi-crop Harvester during sowing window">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top: 32px;">
+            Publish Machinery Listing
+          </button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer"></footer>
+
+  <script type="module">
+    import { renderHeader } from '/assets/js/components/nav.js';
+    import { renderFooter } from '/assets/js/components/footer.js';
+    import { Auth } from '/assets/js/auth.js';
+    import { Api } from '/assets/js/api.js';
+    import { Toast } from '/assets/js/components/toast.js';
+
+    renderHeader();
+    renderFooter();
+
+    if (!Auth.requireAuth()) {
+      // redirected
+    }
+
+    // Toggle deposit & delivery fields
+    document.getElementById('eq-deposit-req').addEventListener('change', (e) => {
+      document.getElementById('eq-deposit-amt').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('eq-delivery-req').addEventListener('change', (e) => {
+      document.getElementById('delivery-settings').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    document.getElementById('eq-exchange-eligible').addEventListener('change', (e) => {
+      document.getElementById('exchange-pref-group').style.display = e.target.checked ? 'block' : 'none';
+    });
+
+    // Populate categories
+    async function loadCategories() {
+      try {
+        const res = await Api.get('/equipment-categories');
+        const categories = res.data.categories || [];
+        const catSelect = document.getElementById('eq-category');
+        catSelect.innerHTML = categories.map(c => `
+          <option value="${c.id}">${c.name}</option>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+    }
+    loadCategories();
+
+    // Submit equipment
+    document.getElementById('add-equipment-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const payload = {
+        title: document.getElementById('eq-title').value.trim(),
+        categoryId: document.getElementById('eq-category').value,
+        equipmentType: document.getElementById('eq-type').value.trim(),
+        manufacturer: document.getElementById('eq-mfr').value.trim() || undefined,
+        model: document.getElementById('eq-model').value.trim() || undefined,
+        manufactureYear: document.getElementById('eq-year').value ? parseInt(document.getElementById('eq-year').value) : undefined,
+        hpPower: document.getElementById('eq-hp').value ? parseInt(document.getElementById('eq-hp').value) : undefined,
+        condition: document.getElementById('eq-condition').value,
+        description: document.getElementById('eq-desc').value.trim(),
+        state: document.getElementById('eq-state').value,
+        district: document.getElementById('eq-district').value.trim(),
+        villageOrTown: document.getElementById('eq-village').value.trim(),
+        pinCode: document.getElementById('eq-pincode').value.trim(),
+        exactAddress: document.getElementById('eq-address').value.trim(),
+        dailyRate: parseFloat(document.getElementById('eq-daily').value),
+        hourlyRate: document.getElementById('eq-hourly').value ? parseFloat(document.getElementById('eq-hourly').value) : undefined,
+        weeklyRate: document.getElementById('eq-weekly').value ? parseFloat(document.getElementById('eq-weekly').value) : undefined,
+        seasonalRate: document.getElementById('eq-seasonal').value ? parseFloat(document.getElementById('eq-seasonal').value) : undefined,
+        bookingApprovalPolicy: document.getElementById('eq-approval').value,
+        minRentalHours: parseInt(document.getElementById('eq-min-hours').value) || 2,
+        depositRequired: document.getElementById('eq-deposit-req').checked,
+        depositAmount: document.getElementById('eq-deposit-req').checked ? parseFloat(document.getElementById('eq-deposit-amt').value) || 0 : 0,
+        deliveryOffered: document.getElementById('eq-delivery-req').checked,
+        deliveryFeePerKm: document.getElementById('eq-delivery-req').checked ? parseFloat(document.getElementById('eq-delivery-fee').value) || 0 : 0,
+        maxDeliveryRadiusKm: document.getElementById('eq-delivery-req').checked ? parseInt(document.getElementById('eq-delivery-radius').value) || 20 : 0,
+        isExchangeEligible: document.getElementById('eq-exchange-eligible').checked,
+        exchangePreferences: document.getElementById('eq-exchange-pref').value.trim() || undefined
+      };
+
+      try {
+        const res = await Api.post('/equipment', payload);
+        Toast.success('Equipment published successfully!');
+        setTimeout(() => {
+          window.location.href = `/equipment-details.html?id=${res.data.equipment.id}`;
+        }, 1200);
+      } catch (err) {
+        Toast.error(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
+
